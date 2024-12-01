@@ -27,7 +27,7 @@ Processed 501 bytes, 0.001 megabytes (SI)
 
 ## Retrospectives
 
-* Day 1: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/1)
+* Day 1: [Historian Hysteria](https://github.com/DestyNova/advent_of_code_2024/blob/main/1)
 * Day 2: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/2)
 * Day 3: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/3)
 * Day 4: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/4)
