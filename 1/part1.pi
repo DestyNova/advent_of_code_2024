@@ -1,0 +1,10 @@
+import util.
+
+main =>
+  R = [extract(L) : L in read_file_lines()],
+  A = ([X[1] : X in R]).sort,
+  B = ([X[2] : X in R]).sort,
+  println(sum([abs(X-Y) : {X,Y} in zip(A,B)])).
+
+extract(S) = L =>
+  L = split(S).map(parse_term).
