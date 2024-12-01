@@ -6,5 +6,4 @@ main =>
   B = ([X[2] : X in R]).sort,
   println(sum([abs(X-Y) : {X,Y} in zip(A,B)])).
 
-extract(S) = L =>
-  L = split(S).map(parse_term).
+extract(S) = S.split.map(parse_term).
