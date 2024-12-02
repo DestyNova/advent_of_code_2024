@@ -1,8 +1,6 @@
 import util.
 
-main =>
-  R = [1 : L in read_file_lines(), L.extract.safe()],
-  println(R.sum).
+main => [1 : L in read_file_lines(), L.extract.safe()].sum.println.
 
 safe(L) =>
   P = L.head,
