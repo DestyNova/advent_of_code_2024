@@ -1,0 +1,17 @@
+import util.
+
+main =>
+  R = [1 : L in read_file_lines(), L.extract.safe()],
+  println(R.sum).
+
+safe(L) =>
+  P = L.head,
+  Dir = sign(P-L.tail.head),
+
+  foreach (X in L.tail)
+    Dir = sign(P-X),
+    membchk(abs(P-X), [1,2,3]),
+    P := X,
+  end.
+
+extract(S) = split(S).map(parse_term).
