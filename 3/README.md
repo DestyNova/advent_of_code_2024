@@ -26,10 +26,18 @@ Benchmark 1: picat part1.pi < input
 
 ### Part 2
 
-(After switching back to line-by-line processing)
+After switching back to line-by-line processing:
 
 ```
 Benchmark 1: picat part2.pi < input
   Time (mean ± σ):     114.1 ms ±   2.5 ms    [User: 103.8 ms, System: 10.1 ms]
   Range (min … max):   111.2 ms … 120.2 ms    25 runs
+```
+
+Alternate way nicer implementation using Hakan Kjellerstrand's [Picat regex module](https://github.com/hakank/picat_regex):
+
+```
+Benchmark 1: picat_regex part2_regex.pi < input
+  Time (mean ± σ):      23.1 ms ±   0.9 ms    [User: 9.8 ms, System: 13.2 ms]
+  Range (min … max):    21.3 ms …  25.7 ms    118 runs
 ```
