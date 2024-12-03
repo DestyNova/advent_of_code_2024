@@ -3,7 +3,7 @@ import regex.
 main => read_file_chars().go.println.
 
 go(S) = R =>
-  Cmds = regex_find_all("(mul\\((\\d+?),(\\d+?)\\)|do\\(\\)|don't\\(\\))", S),
+  Cmds = regex_find_all("(mul\\((\\d+),(\\d+)\\)|do\\(\\)|don't\\(\\))", S),
   {_,R} = fold(process, {true,0}, Cmds).
 
 process("do()", {_,R})     = {true,R}.
