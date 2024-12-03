@@ -1,7 +1,6 @@
 import regex.
-import util.
 
-main => go(read_file_lines().join).println.
+main => read_file_chars().go.println.
 
 go(S) = R =>
   Cmds = regex_find_all("(mul\\((\\d+?),(\\d+?)\\)|do\\(\\)|don't\\(\\))", S),
