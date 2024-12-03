@@ -10,4 +10,4 @@ go(S) = R =>
 process("do()", {_,R})     = {true,R}.
 process("don't()", {_,R})  = {false,R}.
 process([_,X,Y], {true,R}) = {true, R + to_int(X) * to_int(Y)}.
-process(_, {Active,R})     = {Active,R}.
+process(_, State)          = State.
