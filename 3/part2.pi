@@ -1,0 +1,41 @@
+import util.
+
+main =>
+  Should_mul = true,
+  Sum = 0,
+  foreach (L in read_file_lines())
+    extract(L, Should_mul, {Keep_mul, X}),
+    Should_mul := Keep_mul,
+    Sum := Sum + X
+  end,
+  Sum.println.
+
+extract("",Should_mul,R) => R = {Should_mul,0}.
+extract(Do,_,R) ?=>
+  append("do()",Rest,Do),
+  extract(Rest, true, T),
+  R = T.
+extract(Dont,_,R) ?=>
+  append("don't()",Rest,Dont),
+  extract(Rest, false, T),
+  R = T.
+extract(S,Should_mul,R) ?=>
+  append("mul(", N, S),
+  append(A, [','|B], N),
+  append(C, [')'|Rest], B),
+  parseint(A,X),
+  parseint(C,Y),
+  number(X), number(Y),
+  extract(Rest, Should_mul, {Keep_mul,T}),
+  Z = cond(Should_mul, X*Y, 0),
+  R = {Keep_mul, Z + T}.
+extract([_|Xs],Should_mul, R) => extract(Xs, Should_mul, R).
+
+% Surely there is a built-in way to parse an int without throwing on failure?
+parseint(S,R) =>
+  foreach(D in S)
+    digit(D)
+  end,
+  R = to_int(S).
+
+parseint(S,R) => R = no.

@@ -1,0 +1,27 @@
+import util.
+
+main => [X : L in read_file_lines(), extract(L,X)].sum.println.
+
+extract("",R) => R = 0.
+extract(S,R) ?=>
+  append("mul(",N,S),
+  append(A,B,N),
+  append(",",C,B),
+  append(D,Tail,C),
+  append(")",Rest,Tail),
+  parseint(A,X),
+  parseint(D,Y),
+  number(X), number(Y),
+  extract(Rest, T),
+  R = X*Y + T.
+extract([_|Xs],R) ?=> extract(Xs, R).
+
+% Surely there is a built-in way to parse an int without throwing on failure?
+parseint(S,R) =>
+  foreach(D in S)
+    digit(D)
+  end,
+  R = to_int(S).
+
+parseint(S,R) =>
+  R = no.
