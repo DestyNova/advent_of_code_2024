@@ -14,6 +14,10 @@ Ok, now we introduce some state. At first I tried using Picat's global heap maps
 This worked just fine, but took ages -- over 5 seconds on my input because I joined all the input lines together, which makes backtracking on string appends muuuuuch slower.
 To sort this out, I reverted the line joining and just used an imperative-style `foreach`, "returning" the tuple of `{Keep_mul, Line_sum}` for each line. This reduced the runtime to about 100 ms but is pretty ugly.
 
+### Update: regex module
+
+Hakan Kjellerstrand gave me some tips on getting a build of Picat working with his regex module, and it was super-straightforward to write a new version of the part 2 solution using the `regex_find_all/2` function. The resulting program is much shorter and much faster, for my input at least.
+
 ## Timings (with hyperfine)
 
 ### Part 1
@@ -34,7 +38,7 @@ Benchmark 1: picat part2.pi < input
   Range (min … max):   111.2 ms … 120.2 ms    25 runs
 ```
 
-Alternate way nicer implementation using Hakan Kjellerstrand's [Picat regex module](https://github.com/hakank/picat_regex):
+Alternate way nicer implementation using Hakan's [Picat regex module](https://github.com/hakank/picat_regex):
 
 ```
 Benchmark 1: picat_regex part2_regex.pi < input
