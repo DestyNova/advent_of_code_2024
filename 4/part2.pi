@@ -1,0 +1,16 @@
+main =>
+  P = read_file_lines(),
+  count_all(search(P)).println.
+
+search(P) ?=>
+  nth(J,P,R1),
+  nth(J+1,P,R2),
+  nth(J+2,P,R3),
+
+  nth(I,R1,Nw),
+  nth(I+2,R1,Ne),
+  nth(I,R3,Sw),
+  nth(I+2,R3,Se),
+  nth(I+1,R2,'A'),
+
+  member([Nw,Ne,Sw,Se], ["MSMS", "MMSS", "SSMM", "SMSM"]).

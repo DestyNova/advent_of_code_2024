@@ -1,0 +1,20 @@
+main =>
+  P = read_file_lines(),
+  C = 0,
+  S = "XMAS",
+
+  foreach ({Xstep,Ystep} in {{1,0},{0,1},{-1,0},{0,-1},{1,1},{-1,1},{1,-1},{-1,-1}})
+    C := C + count_all(search_diag(S,P,Xstep,Ystep)),
+  end,
+  println(C).
+
+search_diag(S,P,Xstep,Ystep) ?=>
+  nth(J,P,R1),
+  nth(J+1*Ystep,P,R2),
+  nth(J+2*Ystep,P,R3),
+  nth(J+3*Ystep,P,R4),
+
+  nth(I,R1,S[1]),
+  nth(I+1*Xstep,R2,S[2]),
+  nth(I+2*Xstep,R3,S[3]),
+  nth(I+3*Xstep,R4,S[4]).

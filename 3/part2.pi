@@ -22,6 +22,7 @@ extract(Dont,_,R) ?=>
 extract(S,Should_mul,R) ?=>
   append("mul(", N, S),
   append(A, [','|B], N),
+  member(A.len, [1,2,3]), % didn't realise this until later... speeds it up quite a bit
   append(C, [')'|Rest], B),
   parseint(A,X),
   parseint(C,Y),

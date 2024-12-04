@@ -38,6 +38,14 @@ Benchmark 1: picat part2.pi < input
   Range (min … max):   111.2 ms … 120.2 ms    25 runs
 ```
 
+Limiting the first number in each pair to 3 digits max (doing so for the second number actually slows it down):
+
+```
+Benchmark 1: picat part2.pi < input
+  Time (mean ± σ):      24.0 ms ±   1.0 ms    [User: 13.3 ms, System: 10.7 ms]
+  Range (min … max):    22.4 ms …  28.2 ms    109 runs
+```
+
 Alternate way nicer implementation using Hakan's [Picat regex module](https://github.com/hakank/picat_regex):
 
 ```
