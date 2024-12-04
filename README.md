@@ -17,11 +17,11 @@ My solutions for the [Advent of Code 2024](https://adventofcode.com/2024/) progr
 ───────────────────────────────────────────────────────────────────────────────
 Language                     Files       Lines     Blanks    Comments      Code
 ───────────────────────────────────────────────────────────────────────────────
-Picat                            6         125         22           2       101
+Picat                            9         174         31           2       141
 ───────────────────────────────────────────────────────────────────────────────
-Total                            6         125         22           2       101
+Total                            9         174         31           2       141
 ───────────────────────────────────────────────────────────────────────────────
-Processed 2576 bytes, 0.003 megabytes (SI)
+Processed 3728 bytes, 0.004 megabytes (SI)
 ───────────────────────────────────────────────────────────────────────────────
 ```
 
@@ -30,7 +30,7 @@ Processed 2576 bytes, 0.003 megabytes (SI)
 * Day 1: [Historian Hysteria](https://github.com/DestyNova/advent_of_code_2024/blob/main/1)
 * Day 2: [Red-Nosed Reports](https://github.com/DestyNova/advent_of_code_2024/blob/main/2)
 * Day 3: [Mull It Over](https://github.com/DestyNova/advent_of_code_2024/blob/main/3)
-* Day 4: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/4)
+* Day 4: [Ceres Search](https://github.com/DestyNova/advent_of_code_2024/blob/main/4)
 * Day 5: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/5)
 * Day 6: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/6)
 * Day 7: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/7)

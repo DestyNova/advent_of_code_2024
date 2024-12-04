@@ -4,11 +4,11 @@ main =>
   S = "XMAS",
 
   foreach ({Xstep,Ystep} in {{1,0},{0,1},{-1,0},{0,-1},{1,1},{-1,1},{1,-1},{-1,-1}})
-    C := C + count_all(search_diag(S,P,Xstep,Ystep)),
+    C := C + count_all(search(S,P,Xstep,Ystep)),
   end,
   println(C).
 
-search_diag(S,P,Xstep,Ystep) ?=>
+search(S,P,Xstep,Ystep) ?=>
   nth(J,P,R1),
   nth(J+1*Ystep,P,R2),
   nth(J+2*Ystep,P,R3),
