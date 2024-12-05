@@ -1,0 +1,41 @@
+import util.
+
+main =>
+  {Rules, Updates} = read_file_lines().process,
+  Bad = [U : U in Updates, not valid(U, Rules)],
+  Permuted = [Fixed[(Fixed.len + 1) // 2] : U in Bad, valid_permutation(U, Rules, Fixed)],
+  sum(Permuted).println.
+
+valid_permutation([], Rules, Fixed) => Fixed = [].
+valid_permutation(Update, Rules, Fixed) ?=>
+  member(A, Update),
+  Rest = [Y : Y in Update, Y != A],
+  foreach (B in Rest)
+    precedes(A, B, Rules)
+  end,
+  valid_permutation(Rest, Rules, Rest_fixed),
+  Fixed = [A|Rest_fixed].
+
+precedes(X, Y, Rules) => member({X,Y}, Rules).
+precedes(X, Y, Rules) ?=>
+  member({X,Z}, Rules),
+  precedes(Z, Y, Rules).
+
+valid(Update, Rules) =>
+  foreach ({A,B} in Update.zip(Update.tail))
+    A.precedes(B, Rules)
+  end.
+
+process(S) = R =>
+  Rules = [],
+  Updates = [],
+
+  foreach (L in S)
+    if membchk('|', L) then
+      [X,Y] = L.split("|").map(to_int),
+      Rules := [{X,Y}|Rules],
+    elseif membchk(',', L) then
+      Updates := [L.split(",").map(to_int)|Updates],
+    end,
+  end,
+  R = {Rules,Updates}.

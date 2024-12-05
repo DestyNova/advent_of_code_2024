@@ -1,0 +1,29 @@
+import util.
+
+main =>
+  {Rules, Updates} = read_file_lines().process,
+  sum([U[(U.len + 1) // 2] : U in Updates, valid(U, Rules)]).println.
+
+precedes(X, Y, Rules) => member({X,Y}, Rules).
+precedes(X, Y, Rules) ?=>
+  member({X,Z}, Rules),
+  precedes(Z, Y, Rules).
+
+valid(Update, Rules) =>
+  foreach ({A,B} in Update.zip(Update.tail))
+    A.precedes(B, Rules)
+  end.
+
+process(S) = R =>
+  Rules = [],
+  Updates = [],
+
+  foreach (L in S)
+    if membchk('|', L) then
+      [X,Y] = L.split("|").map(to_int),
+      Rules := [{X,Y}|Rules],
+    elseif membchk(',', L) then
+      Updates := [L.split(",").map(to_int)|Updates],
+    end,
+  end,
+  R = {Rules,Updates}.
