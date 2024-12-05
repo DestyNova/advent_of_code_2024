@@ -8,9 +8,9 @@ search(P) ?=>
   nth(J+2,P,R3),
 
   nth(I,R1,Nw),
+  nth(I+1,R2,'A'),
   nth(I+2,R1,Ne),
   nth(I,R3,Sw),
   nth(I+2,R3,Se),
-  nth(I+1,R2,'A'),
 
   member([Nw,Ne,Sw,Se], ["MSMS", "MMSS", "SSMM", "SMSM"]).

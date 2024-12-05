@@ -40,3 +40,11 @@ Benchmark 1: picat part2.pi < input
   Time (mean ± σ):      49.7 ms ±   0.8 ms    [User: 39.2 ms, System: 10.3 ms]
   Range (min … max):    47.7 ms …  51.9 ms    57 runs
 ```
+
+After moving the 'A' check earlier (cuts out unnecessary backtracking later):
+
+```
+Benchmark 1: picat part2.pi < input
+  Time (mean ± σ):      31.0 ms ±   0.7 ms    [User: 20.9 ms, System: 10.0 ms]
+  Range (min … max):    29.6 ms …  32.6 ms    89 runs
+```
