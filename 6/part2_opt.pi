@@ -1,0 +1,49 @@
+main =>
+  G = read_file_lines(),
+  get_start(G,X,Y),
+  println({X,Y}),
+  loop_with_obstacle(G,X,Y,1,1,V,true),
+  C = 0,
+  foreach ({Ox,Oy} in [{I,J} : {I,J,_} in V.keys].remove_dups)
+    if ({Ox,Oy} != {X,Y} && loop_with_obstacle(G,X,Y,Ox,Oy,V2,false)) then
+      C := C+1
+    end
+  end,
+  println(C).
+
+loop_with_obstacle(G,X_start,Y_start,Ox,Oy,V,Explore_path) =>
+  X = X_start,
+  Y = Y_start,
+  V = new_set(),
+  V.put({X,Y,D}),
+  D = n,
+  New = true,
+  while (New && move(G,X,Y,D,Ox,Oy,X2,Y2,D2))
+    X := X2,
+    Y := Y2,
+    D := D2,
+    New := cond(V.has_key({X,Y,D}), false, New),
+    V.put({X,Y,D}),
+  end,
+  (Explore_path ; New == false).
+
+next_dir(n) = e.
+next_dir(e) = s.
+next_dir(s) = w.
+next_dir(w) = n.
+
+step(X,Y,n) = {X,Y-1}.
+step(X,Y,e) = {X+1,Y}.
+step(X,Y,s) = {X,Y+1}.
+step(X,Y,w) = {X-1,Y}.
+
+move(G,X,Y,D,Ox,Oy,X2,Y2,D2) =>
+  P2 = step(X,Y,D),
+  {Xn,Yn} = P2,
+  nth(Yn,G,R),
+  nth(Xn,R,C),
+  ((C != '#', {Xn,Yn} != {Ox,Oy}, D2 = D, X2 = Xn, Y2 = Yn) ; move(G,X,Y,next_dir(D),Ox,Oy,X2,Y2,D2)).
+
+get_start(G,X,Y) ?=>
+  nth(Y,G,Row),
+  nth(X,Row,'^').

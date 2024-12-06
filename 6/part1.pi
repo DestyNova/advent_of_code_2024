@@ -1,0 +1,36 @@
+main =>
+  V = new_set(),
+  G = read_file_lines(),
+  get_start(G, X, Y),
+  println({X,Y}),
+  V.put({X,Y}),
+
+  D = n,
+  while (move(G,X,Y,D,X2,Y2,D2))
+    X := X2,
+    Y := Y2,
+    D := D2,
+    V.put({X,Y}),
+  end,
+  println(V.size).
+
+next_dir(n) = e.
+next_dir(e) = s.
+next_dir(s) = w.
+next_dir(w) = n.
+
+step(X,Y,n) = {X,Y-1}.
+step(X,Y,e) = {X+1,Y}.
+step(X,Y,s) = {X,Y+1}.
+step(X,Y,w) = {X-1,Y}.
+
+move(G,X,Y,D,X2,Y2,D2) =>
+  P2 = step(X,Y,D),
+  {Xn,Yn} = P2,
+  nth(Yn,G,R),
+  nth(Xn,R,C),
+  ((C != '#', D2 = D, X2 = Xn, Y2 = Yn) ; move(G,X,Y,next_dir(D),X2,Y2,D2)).
+
+get_start(G,X,Y) ?=>
+  nth(Y,G,Row),
+  nth(X,Row,'^').
