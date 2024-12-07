@@ -1,9 +1,9 @@
-import sat.
+import cp.
 import util.
 
 main =>
   D = read_file_lines().map(process),
-  %D = [{292,[11,6,16,20]}],
+  garbage_collect(50000000),
   [N : {N,Ns} in D, go(N,Ns)].sum.println.
 
 go(N,Ns) =>
@@ -23,7 +23,5 @@ go(N,Ns) =>
 
 process(L) = R =>
   D = L.split(":"),
-  println(D),
   [N, Ns] = D,
-  R = {N.to_int, Ns.split().map(to_int)},
-  println(R).
+  R = {N.to_int, Ns.split().map(to_int)}.

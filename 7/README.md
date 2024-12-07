@@ -15,6 +15,10 @@ The program still takes about 35 seconds with the built-in `sat` module, and no 
 
 **Update:** Looking at the output of `time`, the large system time component suggested Picat was possibly spending a lot of time doing `malloc`. I added `garbage_collect(50000000)`, determining the number through trial and error, aka adding a zero until it got better. Amazingly, this reduced the runtime from 35 seconds to just over 4 seconds.
 
+#### Planner version
+
+For fun and curiosity I tried formulating part 2 as planning problem to be solved with Picat's built-in `planner` module. This was incredibly straightforward and concise, and produced the correct answer, albeit slowly at approx 11 seconds. The planner seems to require a **lot** of memory to do its things.
+
 ## Timings (not with hyperfine)
 
 ### Part 1
