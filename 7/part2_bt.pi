@@ -1,0 +1,19 @@
+import util.
+
+main =>
+  D = read_file_lines().map(process),
+  [N : {N,Xs} in D, go({N,0,Xs})].sum.println.
+
+go({N,N,[]}).
+go({N,Acc,[X|Xs]}) :-
+  Acc <= N,
+  member(Action, [add, mul, cat]),
+  (
+    (Action == add, Acc2 = Acc + X);
+    (Action == mul, Acc2 = Acc * X);
+    (Action == cat, Acc2 = Acc*10**floor(log10(X)+1) + X)
+  ),
+  S1 = {N, Acc2, Xs},
+  go({N,Acc2,Xs}).
+
+process(L) = {N.to_int, Ns.split.map(to_int)} => [N, Ns] = L.split(":").
