@@ -11,9 +11,11 @@ final({N,N,[]}).
 action({N,Acc,[X|Xs]}, S1, Action, Cost) ?=>
   Acc <= N,
   member(Action, [add, mul, cat]),
-  Acc2 = cond(Action == add,
-           Acc + X,
-           cond(Action == mul, Acc * X, Acc*10**floor(log10(X)+1) + X)),
+  (
+    (Action == add, Acc2 = Acc + X);
+    (Action == mul, Acc2 = Acc * X);
+    (Action == cat, Acc2 = Acc*10**floor(log10(X)+1) + X)
+  ),
   S1 = {N, Acc2, Xs},
   Cost = 1.
 
