@@ -13,7 +13,6 @@ go({N,Acc,[X|Xs]}) :-
     (Action == mul, Acc2 = Acc * X);
     (Action == cat, Acc2 = Acc*10**floor(log10(X)+1) + X)
   ),
-  S1 = {N, Acc2, Xs},
   go({N,Acc2,Xs}).
 
 process(L) = {N.to_int, Ns.split.map(to_int)} => [N, Ns] = L.split(":").
