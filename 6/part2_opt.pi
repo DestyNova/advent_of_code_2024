@@ -5,6 +5,7 @@ main =>
   loop_with_obstacle(G,X,Y,1,1,V,true),
   C = 0,
   foreach ({Ox,Oy} in [{I,J} : {I,J,_} in V.keys].remove_dups)
+    garbage_collect(50000000),
     if ({Ox,Oy} != {X,Y} && loop_with_obstacle(G,X,Y,Ox,Oy,V2,false)) then
       C := C+1
     end
