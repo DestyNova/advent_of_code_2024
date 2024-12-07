@@ -23,7 +23,7 @@ For fun and curiosity I tried formulating part 2 as planning problem to be solve
 
 It occurred to me that I wasn't actually using the planner's plan exploration features, since it was just backtracking and looking for any working plan, rather than seeking an optimal plan... and when I tried to mess with the cost and heuristic features to guide the search, it just made things worse.
 
-So I took the planner program and got rid of planner, combining the `action` and `final` predicates into `go`. It turns out this program was much faster, finishing in under 3 seconds with the correct result. Huh!
+So I took the planner program and got rid of planner, combining the `action` and `final` predicates into `go`. It turns out this program was much faster, finishing in under 3 seconds with the correct result. Huh! Some more micro-optimising (getting rid of the `Action` variable and hoisting the arguments out of an array) brought it down to 1.8s.
 
 ## Timings (not with hyperfine)
 
@@ -52,5 +52,5 @@ picat part2_planner.pi < input  9.48s user 1.80s system 99% cpu 11.288 total
 
 Backtracking version:
 ```
-picat part2_bt.pi < input  2.93s user 0.02s system 99% cpu 2.943 total
+picat part2_bt.pi < input  1.78s user 0.01s system 99% cpu 1.792 total
 ```
