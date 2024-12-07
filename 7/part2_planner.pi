@@ -3,7 +3,6 @@ import util.
 
 main =>
   D = read_file_lines().map(process),
-  garbage_collect(50000000), % nope
   [N : {N,Xs} in D, plan({N,0,Xs},_,_)].sum.println.
 
 final({N,N,[]}).
@@ -19,7 +18,4 @@ action({N,Acc,[X|Xs]}, S1, Action, Cost) ?=>
   S1 = {N, Acc2, Xs},
   Cost = 1.
 
-process(L) = R =>
-  D = L.split(":"),
-  [N, Ns] = D,
-  R = {N.to_int, Ns.split.map(to_int)}.
+process(L) = {N.to_int, Ns.split.map(to_int)} => [N, Ns] = L.split(":").
