@@ -1,0 +1,29 @@
+import sat.
+import util.
+
+main =>
+  D = read_file_lines().map(process),
+  %D = [{292,[11,6,16,20]}],
+  [N : {N,Ns} in D, go(N,Ns)].sum.println.
+
+go(N,Ns) =>
+  L = Ns.len,
+  [Add,Mul] = [1,2],
+  Ops = new_array(L-1),
+  Ops :: 1..2,
+  Sums = new_array(L),
+  Sums[1] = Ns[1],
+
+  foreach (I in 2..L)
+    Sums[I] #= cond(Ops[I-1] #= 1, Sums[I-1] + Ns[I], Sums[I-1] * Ns[I])
+  end,
+  Sums[L] #= N,
+
+  solve([], [Sums]).
+
+process(L) = R =>
+  D = L.split(":"),
+  println(D),
+  [N, Ns] = D,
+  R = {N.to_int, Ns.split().map(to_int)},
+  println(R).
