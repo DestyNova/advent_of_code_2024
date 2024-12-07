@@ -19,7 +19,7 @@ go(N,Ns) =>
   end,
   Sums[L] #= N,
 
-  solve([], [Sums]).
+  solve([ff,split], [Sums]).
 
 process(L) = R =>
   D = L.split(":"),
