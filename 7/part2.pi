@@ -12,7 +12,7 @@ go(N,Ns) =>
   Ops = new_array(L-1),
   Ops :: 1..3,
   Sums = new_array(L),
-  Sums :: 0..2**48,
+  Sums :: 0..N,
   Sums[1] = Ns[1],
 
   foreach (I in 2..L)
@@ -28,4 +28,4 @@ go(N,Ns) =>
 process(L) = R =>
   D = L.split(":"),
   [N, Ns] = D,
-  R = {N.to_int, Ns.split().map(to_int)}.
+  R = {N.to_int, Ns.split.map(to_int)}.
