@@ -17,11 +17,11 @@ My solutions for the [Advent of Code 2024](https://adventofcode.com/2024/) progr
 ───────────────────────────────────────────────────────────────────────────────
 Language                     Files       Lines     Blanks    Comments      Code
 ───────────────────────────────────────────────────────────────────────────────
-Picat                           16         443         68          10       365
+Picat                           20         567         91          10       466
 ───────────────────────────────────────────────────────────────────────────────
-Total                           16         443         68          10       365
+Total                           20         567         91          10       466
 ───────────────────────────────────────────────────────────────────────────────
-Processed 9373 bytes, 0.009 megabytes (SI)
+Processed 12004 bytes, 0.012 megabytes (SI)
 ───────────────────────────────────────────────────────────────────────────────
 ```
 
@@ -34,7 +34,7 @@ Processed 9373 bytes, 0.009 megabytes (SI)
 * Day 5: [Print Queue](https://github.com/DestyNova/advent_of_code_2024/blob/main/5)
 * Day 6: [Guard Gallivant](https://github.com/DestyNova/advent_of_code_2024/blob/main/6)
 * Day 7: [Bridge Repair](https://github.com/DestyNova/advent_of_code_2024/blob/main/7)
-* Day 8: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/8)
+* Day 8: [Resonant Collinearity](https://github.com/DestyNova/advent_of_code_2024/blob/main/8)
 * Day 9: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/9)
 * Day 10: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/10)
 * Day 11: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/11)

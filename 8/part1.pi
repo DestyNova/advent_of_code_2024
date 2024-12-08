@@ -1,0 +1,38 @@
+import util.
+
+main =>
+  G = read_file_lines(),
+  Fs = [C : C in G.flatten, C != '.'].remove_dups,
+  As = new_set(),
+  foreach (F in Fs)
+    go(F,G) ; true,
+  end,
+  println(get_global_map(antis).size).
+
+go(F,G) ?=>
+  nth(Y1,G,Row1), nth(X1,Row1,F),
+  nth(Y2,G,Row2), nth(X2,Row2,F),
+  [A1,A2] = [{X1,Y1}, {X2,Y2}],
+  A1 != A2,
+  [A1,A2] = [A1,A2].sort,
+
+  [{I1,J1}, {I2,J2}] = [A1,A2],
+  X_dist = I2-I1,
+  Y_dist = J2-J1,
+
+  Anti1 = {I1-X_dist, J1-Y_dist},
+  if (in_bounds(Anti1,G)) then
+    save_antinode(Anti1),
+  end,
+
+  Anti2 = {I2+X_dist, J2+Y_dist},
+  if (in_bounds(Anti2,G)) then
+    save_antinode(Anti2),
+  end,
+  fail.
+
+in_bounds({X,Y}, G) =>
+  Y >= 1, Y <= G.len,
+  X >= 1, X <= G[1].len.
+
+save_antinode(A) => get_global_map(antis).put(A).
