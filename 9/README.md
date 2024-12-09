@@ -18,7 +18,7 @@ That worked without too much trouble, but was very slow at around 16.7 seconds. 
 
 **Later:** Yep! At first I got it working with the free space represented as a map from start position to size. I was sorta hoping for a nondet predicate like `nth`, but for keys in a map, that would attempt them in lexicographic order. So I went back to the sorted list idea, and made use of Picat's `insert_sorted` function. In this case I would have preferred for it to mutate the list, but instead I had to save the `Next_free_slots` list as an output variable from the `go` predicate.
 
-This version is about 9x faster than the previous one, clocking in at 2 seconds.
+This version is about 9x faster than the previous one, clocking in at 2 seconds. With a few more optimisations (esp. head-appending to a list repeatedly, then calling `sort` once, rather than calling `insert_sorted` repeatedly) it's down to 1.3 seconds.
 
 ## Timings
 
@@ -32,4 +32,6 @@ Benchmark 1: picat part1.pi < input
 
 ### Part 2
 
-First version: around 16.7s, part2_smrt.pi with file map and free list move / merges: 2s.
+* First version: around 16.7s
+* part2_smrt.pi with file map and free list move / merges: 2s
+* part2_smrt.pi after replacing repeated `insert_sorted` calls with head accumulation + single call to `sort`: 1.3s

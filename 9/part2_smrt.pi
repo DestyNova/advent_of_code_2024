@@ -49,15 +49,15 @@ create_disk_map(Table,Max_id,File_map,Free_slots) =>
   Free = [],
   Id = 0,
   M = 0,
-  File = true,
   Pos = 0,
 
-  foreach (C in Table)
+  foreach ({C,I} in Table.zip(1..Table.len))
+    File = (I mod 2 == 1),
     Size = [C].to_int,
     if File then
       File_map.put(Id, {Pos,Size})
     else
-      Free := Free.insert_ordered({Pos, Size})
+      Free := [{Pos, Size}|Free]
     end,
     Pos := Pos + Size,
 
@@ -65,9 +65,8 @@ create_disk_map(Table,Max_id,File_map,Free_slots) =>
       M := Id,
       Id := Id + 1
     end,
-    File := cond(File, false, true),
   end,
-  Free_slots = Free,
+  Free_slots = Free.sort,
   Max_id = M. % why is this necessary?
 
 checksum(File_map) = [[Id*I : I in Pos..Pos+Size-1].sum : Id={Pos,Size} in File_map].sum.
