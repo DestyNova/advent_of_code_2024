@@ -1,0 +1,68 @@
+import util.
+
+main =>
+  Table = read_file_chars().strip,
+  D = new_array([to_int([C]) : C in Table].sum),
+
+  create_disk_map(D, Table, Max_id, Starts),
+  println(max_id=Max_id),
+
+  Id = Max_id,
+  while (go(1,Id,Starts,D,Next_id))
+    Id := Next_id,
+    if Id mod 100 == 0 then
+      println(id=Id)
+    end,
+  end,
+  D.checksum.println.
+
+go(L,Id,Starts,D,Next_id) ?=>
+  Id >= 0,
+  {Pos,Size} = Starts.get(Id),
+  ((
+    nth(I,D,-1),
+    I < Pos,
+    I + Size <= D.len,
+    foreach (J in 1..Size-1)
+      nth(I+J,D,-1),
+    end,
+    % found a free block, move it, no need to update Starts
+    foreach (J in 0..Size-1)
+      D[I+J] := Id,
+      D[Pos+J] := -1
+    end
+  ) ;
+    % couldn't find space, but that's okay, we can move on
+    true
+  ),
+  Next_id = Id - 1.
+
+create_disk_map(D,Table,Max_id,Starts) =>
+  Starts = new_map(),
+  Id = 0,
+  M = 0,
+  File = true,
+  Pos = 1,
+
+  foreach (C in Table)
+    Size = [C].to_int,
+    if File then
+      Starts.put(Id, {Pos,Size})
+    end,
+    foreach (I in 1..Size)
+      D[Pos] := cond(File, Id, -1),
+      Pos := Pos + 1
+    end,
+    if File then
+      M := Id,
+      Id := Id + 1
+    end,
+    File := cond(File, false, true),
+  end,
+  Max_id = M. % why is this necessary?
+
+checksum(D) = S =>
+  S = 0,
+  foreach (I in 1..D.len)
+    S := S + (I-1) * max(0,D[I])
+  end.

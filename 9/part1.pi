@@ -1,0 +1,42 @@
+import util.
+
+main =>
+  B = read_file_chars().strip,
+  D = new_array([to_int([C]) : C in B].sum),
+
+  Id = 0,
+  File = true,
+  Pos = 1,
+  foreach (C in B)
+    foreach (I in 1..[C].to_int)
+      D[Pos] := cond(File, Id, -1),
+      Pos := Pos + 1
+    end,
+    if (File) then
+      Id := Id + 1
+    end,
+    File := cond(File, false, true),
+  end,
+
+  L = 1,
+  R = D.len,
+  while (L < R)
+    if (D[L] == -1) then
+      if (D[R] != -1) then
+        D[L] := D[R],
+        D[R] := -1,
+        L := L + 1,
+      end,
+      R := R - 1
+    else
+      L := L + 1,
+    end
+  end,
+
+  D.checksum.println.
+
+checksum(D) = S =>
+  S = 0,
+  foreach (I in 1..D.len)
+    S := S + (I-1) * max(0,D[I])
+  end.
