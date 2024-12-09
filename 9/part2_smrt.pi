@@ -1,0 +1,74 @@
+import util.
+
+main =>
+  Table = read_file_chars().strip,
+  D = new_array([to_int([C]) : C in Table].sum),
+
+  create_disk_map(Table, Max_id, File_map, Free_slots),
+
+  Id = Max_id,
+  while (go(1,Id,File_map,Free_slots,New_free_slots,Next_id))
+    Free_slots := New_free_slots,
+    Id := Next_id,
+  end,
+  File_map.checksum.println.
+
+go(L,Id,File_map,Free_slots,New_free_slots,Next_id) ?=>
+  Id >= 0,
+  {Pos,Size} = File_map.get(Id),
+  ((
+    %nth(J,Free_slots,I),
+    nth(J,Free_slots,{I,Free_size}),
+    I < Pos,
+    Size <= Free_size,
+    % found a free block, remove from table
+    Free_slots := Free_slots.delete({I,Free_size}), % try _
+    % move file
+    File_map.put(Id, {I,Size}),
+    % recreate remaining free space
+    if Size < Free_size then
+      New_free_pos = I+Size,
+      New_free_size = Free_size-Size,
+      % merge forward if there is free space following
+      Merge_pos = New_free_pos + New_free_size,
+      if membchk(Free_slots, {Merge_pos, Merge_size}) then
+        Free_slots := Free_slots.delete({Merge_pos, Merge_size}),
+        New_free_size := New_free_size + Merge_size
+      end,
+      Free_slots := Free_slots.insert_ordered({I+Size, New_free_size})
+    end
+  ) ;
+    % couldn't find space, but that's okay, we can move on
+    true
+  ),
+  New_free_slots = Free_slots,
+  Next_id = Id - 1.
+
+create_disk_map(Table,Max_id,File_map,Free_slots) =>
+  File_map = new_map(),
+  Free = [],
+  Id = 0,
+  M = 0,
+  File = true,
+  Pos = 0,
+
+  foreach (C in Table)
+    Size = [C].to_int,
+    if File then
+      File_map.put(Id, {Pos,Size})
+    else
+      Free := Free.insert_ordered({Pos, Size})
+    end,
+    Pos := Pos + Size,
+
+    if File then
+      M := Id,
+      Id := Id + 1
+    end,
+    File := cond(File, false, true),
+  end,
+  Free_slots = Free,
+  Max_id = M. % why is this necessary?
+
+checksum(File_map) = S =>
+  S = [[Id*I : I in Pos..Pos+Size-1].sum : Id={Pos,Size} in File_map].sum.
