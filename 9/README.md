@@ -16,6 +16,10 @@ A big chunk of the `go` predicate is wrapped in a disjunction, since we don't co
 
 That worked without too much trouble, but was very slow at around 16.7 seconds. I'm not sure what can be done to speed it up without fundamentally changing the approach. Perhaps we could also track free blocks, like we tracked initial file positions in `Starts`, but that seems waaaaay more complex -- consider a case like this: `00...22..1`. We want to move `22` to position 2 (counting from zero), which means the free space at 0 is removed, and one block of free space gets moved to position 6 and merged with the existing free space at position 7. Okay, maybe it's doable now that I've said it out loud: represent free space as a list of `{Pos,Size}` tuples, then walk them and erase / insert / merge as needed. Will try that later maybe.
 
+**Later:** Yep! At first I got it working with the free space represented as a map from start position to size. I was sorta hoping for a nondet predicate like `nth`, but for keys in a map, that would attempt them in lexicographic order. So I went back to the sorted list idea, and made use of Picat's `insert_sorted` function. In this case I would have preferred for it to mutate the list, but instead I had to save the `Next_free_slots` list as an output variable from the `go` predicate.
+
+This version is about 9x faster than the previous one, clocking in at 2 seconds.
+
 ## Timings
 
 ### Part 1
@@ -28,4 +32,4 @@ Benchmark 1: picat part1.pi < input
 
 ### Part 2
 
-Too slow; around 16.7 seconds.
+First version: around 16.7s, part2_smrt.pi with file map and free list move / merges: 2s.
