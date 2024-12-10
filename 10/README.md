@@ -27,6 +27,7 @@ Benchmark 1: picat part1.pi < input
 
 ```
 Benchmark 1: picat part2.pi < input
-  Time (mean ± σ):      27.6 ms ±   1.2 ms    [User: 16.2 ms, System: 11.3 ms]
-  Range (min … max):    25.4 ms …  32.1 ms    108 runs
+  Time (mean ± σ):      25.6 ms ±   0.9 ms    [User: 15.3 ms, System: 10.2 ms]
+  Range (min … max):    24.2 ms …  29.2 ms    111 runs
+ 
 ```

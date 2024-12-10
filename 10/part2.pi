@@ -1,36 +1,21 @@
-import planner.
 import util.
 
 main =>
   G = [L.process : L in read_file_lines()],
-  println(ok),
-  Starts = find_all(X, init(G,X)),
-  println(Starts),
-  Sum = 0,
-  foreach (S in Starts)
-    %println(s=S),
-    {X,Y} = S,
-    N = count_all(move(0,G,X,Y)),
-    %println(ends=Ends.len),
-    Sum := Sum + N,
-    println(Sum)
-  end,
-  nl.
+  Starts = find_all({X,Y}, init(G,X,Y)),
+  [count_all(move(0,G,X,Y)) : {X,Y} in Starts].sum.println.
 
-init(G,R) ?=>
+init(G,X,Y) ?=>
   nth(Y,G,Row),
-  nth(X,Row,0),
-  R = {X,Y}.
+  nth(X,Row,0).
 
 move(9,G,X,Y).
-
 move(N,G,X,Y) :-
   member({I,J}, [{1,0},{0,1},{-1,0},{0,-1}]),
   X2 = X+I,
   Y2 = Y+J,
   nth(Y2,G,Row),
-  nth(X2,Row,N2),
-  N2 = N+1,
-  move(N2,G,X2,Y2).
+  nth(X2,Row,N+1),
+  move(N+1,G,X2,Y2).
 
-process(L) = [cond(C == '.', -1, [C].to_int) : println(L), C in L].
+process(L) = [cond(C == '.', -1, [C].to_int) : C in L].
