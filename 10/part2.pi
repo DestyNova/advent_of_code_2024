@@ -1,5 +1,3 @@
-import util.
-
 main =>
   G = [L.process : L in read_file_lines()],
   Starts = find_all({X,Y}, init(G,X,Y)),
