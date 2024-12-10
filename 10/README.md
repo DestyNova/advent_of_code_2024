@@ -19,8 +19,8 @@ As soon as I saw the first couple of examples it was clear that I'd already (acc
 
 ```
 Benchmark 1: picat part1.pi < input
-  Time (mean ± σ):      26.7 ms ±   0.8 ms    [User: 16.0 ms, System: 10.6 ms]
-  Range (min … max):    25.3 ms …  29.7 ms    100 runs
+  Time (mean ± σ):      26.7 ms ±   0.8 ms    [User: 15.6 ms, System: 11.0 ms]
+  Range (min … max):    25.2 ms …  29.6 ms    107 runs
 ```
 
 ### Part 2
@@ -29,5 +29,4 @@ Benchmark 1: picat part1.pi < input
 Benchmark 1: picat part2.pi < input
   Time (mean ± σ):      25.6 ms ±   0.9 ms    [User: 15.3 ms, System: 10.2 ms]
   Range (min … max):    24.2 ms …  29.2 ms    111 runs
- 
 ```
