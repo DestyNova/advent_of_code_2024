@@ -1,0 +1,31 @@
+import util.
+
+main =>
+  G = [L.process : L in read_file_lines()],
+  Starts = find_all(X, init(G,X)),
+
+  Sum = 0,
+  foreach (S in Starts)
+    {X,Y} = S,
+    Ends = find_all(E,move(0,G,X,Y,E)),
+    Sum := Sum + Ends.remove_dups.len,
+  end,
+  println(Sum).
+
+init(G,R) ?=>
+  nth(Y,G,Row),
+  nth(X,Row,0),
+  R = {X,Y}.
+
+move(9,G,X,Y,E) :- E = {X,Y}.
+
+move(N,G,X,Y,E) :-
+  member({I,J}, [{1,0},{0,1},{-1,0},{0,-1}]),
+  X2 = X+I,
+  Y2 = Y+J,
+  nth(Y2,G,Row),
+  nth(X2,Row,N2),
+  N2 = N+1,
+  move(N2,G,X2,Y2,E).
+
+process(L) = [cond(C == '.', -1, [C].to_int) : C in L].
