@@ -24,6 +24,8 @@ The slightly more niggly bit was updating the counts correctly. I think the logi
 
 It was still a bit slow (419ms), so I tried adding a `table` declaration (a Picat directive that caches the result of calls to a function, aka dynamic programming) to the `splat` predicate which brought it down to 150ms. That is so handy.
 
+Later, I got rid of the string manipulation for splitting a pebble in two halves, and used `log10` logic instead, but it made basically no difference at all. But while I was playing around with that, I realised the Prolog-style `:-` predicates force Picat to accumulate backtracking state. But I don't really want this in `splat` -- they were only there so I could require the input to have an even number of digits in the second rule head. I replaced that check with one that involves some duplication (I can't use the definition of `L` inside the predicate), and that brought the time down to a cool 93ms.
+
 ## Timings
 
 ### Part 1
@@ -56,4 +58,12 @@ After adding `table`:
 Benchmark 1: picat part2.pi < input
   Time (mean ± σ):     149.5 ms ±   7.1 ms    [User: 108.3 ms, System: 42.0 ms]
   Range (min … max):   142.2 ms … 175.1 ms    19 runs
+``` 
+
+After replacing the Prolog backtracking predicates with Picat `=>` non-backtrackable ones:
+
+```
+Benchmark 1: picat part2.pi < input
+  Time (mean ± σ):      93.4 ms ±   2.6 ms    [User: 75.1 ms, System: 18.2 ms]
+  Range (min … max):    89.2 ms … 100.5 ms    31 runs
 ``` 
