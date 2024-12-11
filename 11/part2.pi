@@ -11,10 +11,10 @@ main =>
 go(0,M) = M.
 go(N,M) = R =>
   M2 = new_map(),
-  foreach (K=V in M)
-    splat(K,Xs),
+  foreach (X=Count in M)
+    splat(X,Xs),
     foreach (Y in Xs)
-      M2.put(Y,M2.get(Y,0)+V)
+      M2.put(Y,M2.get(Y,0)+Count)
     end
   end,
   R = go(N-1,M2).
