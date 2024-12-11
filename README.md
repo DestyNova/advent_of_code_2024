@@ -17,11 +17,11 @@ My solutions for the [Advent of Code 2024](https://adventofcode.com/2024/) progr
 ───────────────────────────────────────────────────────────────────────────────
 Language                     Files       Lines     Blanks    Comments      Code
 ───────────────────────────────────────────────────────────────────────────────
-Picat                           25         788        118          17       653
+Picat                           27         838        126          17       695
 ───────────────────────────────────────────────────────────────────────────────
-Total                           25         788        118          17       653
+Total                           27         838        126          17       695
 ───────────────────────────────────────────────────────────────────────────────
-Processed 16721 bytes, 0.017 megabytes (SI)
+Processed 17584 bytes, 0.018 megabytes (SI)
 ───────────────────────────────────────────────────────────────────────────────
 ```
 
@@ -37,7 +37,7 @@ Processed 16721 bytes, 0.017 megabytes (SI)
 * Day 8: [Resonant Collinearity](https://github.com/DestyNova/advent_of_code_2024/blob/main/8)
 * Day 9: [Disk Fragmenter](https://github.com/DestyNova/advent_of_code_2024/blob/main/9)
 * Day 10: [Hoof It](https://github.com/DestyNova/advent_of_code_2024/blob/main/10)
-* Day 11: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/11)
+* Day 11: [Plutonian Pebbles](https://github.com/DestyNova/advent_of_code_2024/blob/main/11)
 * Day 12: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/12)
 * Day 13: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/13)
 * Day 14: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/14)

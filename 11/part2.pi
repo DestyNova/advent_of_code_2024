@@ -1,0 +1,30 @@
+import util.
+
+main =>
+  Xs = read_file_lines().head.split.map(to_int),
+  M = new_map(),
+  foreach (X in Xs)
+    M.put(X, M.get(X,0)+1)
+  end,
+  go(75,M).values.sum.println.
+
+go(0,M) = M.
+go(N,M) = R =>
+  M2 = new_map(),
+  foreach (K=V in M)
+    splat(K,Xs),
+    foreach (Y in Xs)
+      M2.put(Y,M2.get(Y,0)+V)
+    end
+  end,
+  R = go(N-1,M2).
+
+table
+splat(0,[1]).
+splat(X,R) :-
+  S = X.to_string,
+  L = X.to_string.len,
+  even(L),
+  R = [S.take(L//2).to_int, S.drop(L//2).to_int].
+
+splat(X,R) :- R = [X*2024].
