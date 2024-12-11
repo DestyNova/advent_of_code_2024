@@ -23,7 +23,7 @@ table
 splat(0,R) => R = [1].
 splat(X,R), X.to_string.len.even =>
   S = X.to_string,
-  L = X.to_string.len,
+  L = S.len,
   R = [S.take(L//2).to_int, S.drop(L//2).to_int].
 
 splat(X,R) => R = [X*2024].
