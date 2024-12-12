@@ -1,0 +1,51 @@
+main =>
+  G = read_file_lines(),
+  Regs = find_all(X,find_region(G,C,X)),
+  [A*P : {_,_,A,P} in Regs].sum.println.
+
+find_region(G,C,R) ?=>
+  nth(Y,G,Row),
+  nth(X,Row,C),
+  Start = {X,Y},
+  not get_global_map(visited).has_key(Start),
+  Region = new_set(),
+  expand_region(G,[Start],0,C,Region,Perimeter),
+  First_loc = Region.keys.sort.head,
+  R = {C,First_loc,Region.size,Perimeter}.
+
+in_bounds({X,Y},G) =>
+  nth(Y,G,R),
+  nth(X,R,_).
+
+empty({X2,Y2},C,G) => not (in_bounds({X2,Y2},G) && C == G[Y2,X2]).
+
+expand_region(G,[],Edges,C,Region,All_edges) => All_edges=Edges.
+expand_region(G,[{X,Y}|Q],Edges,C,Region,All_edges) =>
+  Corners = 0,
+
+  if not Region.has_key({X,Y}) then
+    Region.put({X,Y}),
+    get_global_map(visited).put({X,Y}),
+
+    % check all four corners
+    foreach ({I,J} in {{1,0},{0,1},{-1,0},{0,-1}})
+      {X2,Y2} = {X+I,Y+J},
+      % outside region, save the edge (position and direction towards the void) for later
+      if not empty({X2,Y2},C,G) then
+        % add connected nodes to the queue
+        append(Q,[{X2,Y2}],Q2),
+        Q := Q2
+      end
+    end,
+
+    % count disconnected corners... there must be a nicer way
+    Ls = [{{-1,0},{-1,-1},{0,-1}},{{0,-1},{1,-1},{1,0}},{{1,0},{1,1},{0,1}},{{0,1},{-1,1},{-1,0}}],
+    foreach (L in Ls)
+      Empties = [cond(empty({X+I,Y+J},C,G), 1, 0) : {I,J} in L],
+      if member(Empties, [[1,_,1], [0,1,0]]) then
+        Corners := Corners + 1
+      end
+    end
+  end,
+
+  expand_region(G,Q,Edges + Corners,C,Region,All_edges).

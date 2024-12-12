@@ -1,0 +1,82 @@
+main =>
+  G = read_file_lines(),
+  Regs = find_all(X,find_region(G,C,X)),
+  [A*P : {_,_,A,P} in Regs].sum.println.
+
+find_region(G,C,R) ?=>
+  nth(Y,G,Row),
+  nth(X,Row,C),
+  Start = {X,Y},
+  not get_global_map(visited).has_key(Start),
+  Region = new_set(),
+  Edges = new_map(),
+  expand_region(G,[{Start,{0,0}}],Edges,C,Region),
+  Perimeter = propagate_edges(Edges).remove_dups.len,
+  First_loc = Region.keys.sort.head,
+  R = {C,First_loc,Region.size,Perimeter}.
+
+propagate_edges(Edges) = R =>
+  Keys = Edges.keys,
+  Updated = true,
+
+  % horrible edge coalescing algorithm, use union-find instead
+  while (Updated)
+    Updated := false,
+    foreach (I in 1..Keys.len-1)
+      foreach (J in I+1..Keys.len)
+        K1 = Keys[I],
+        K2 = Keys[J],
+        E1 = Edges.get(K1,K1),
+        {X1,Y1,Dir1} = E1,
+        E2 = Edges.get(K2,K2),
+        {X2,Y2,Dir2} = E2,
+        if connected_edge(K1,K2) then
+          Min = [E1,E2].min,
+          if E1 != Min || E2 != Min then
+            Updated := true
+          end,
+          Edges.put(K1, Min),
+          Edges.put(K2, Min),
+        end,
+      end,
+    end,
+  end,
+  R = Edges.values.
+
+connected_edge({X1,Y1,north},{X2,Y2,north}) => Y1 = Y2, abs(X2 - X1) = 1.
+connected_edge({X1,Y1,south},{X2,Y2,south}) => Y1 = Y2, abs(X2 - X1) = 1.
+connected_edge({X1,Y1,east},{X2,Y2,east}) => X1 = X2, abs(Y2 - Y1) = 1.
+connected_edge({X1,Y1,west},{X2,Y2,west}) => X1 = X2, abs(Y2 - Y1) = 1.
+
+in_bounds({X,Y},G) =>
+  nth(Y,G,R),
+  nth(X,R,_).
+
+get_dir(1,0) = east.
+get_dir(0,1) = south.
+get_dir(-1,0) = west.
+get_dir(0,-1) = north.
+
+expand_region(G,[],All_edges,C,Region) => true.
+expand_region(G,[{{X,Y},{Dx,Dy}}|Q],All_edges,C,Region) =>
+  if not Region.has_key({X,Y}) then
+    Region.put({X,Y}),
+    get_global_map(visited).put({X,Y}),
+    {East,South,West,North} = {1,2,3,4},
+
+    % check all four sides
+    foreach ({Z,{I,J}} in zip(1..4, [{1,0},{0,1},{-1,0},{0,-1}]))
+      {X2,Y2} = {X+I,Y+J},
+      % outside region, save the edge (position and direction towards the void) for later
+      if not (in_bounds({X2,Y2},G) && C == G[Y2,X2]) then
+        P = {X,Y,get_dir(I,J)},
+        All_edges.put(P,P),
+      else
+        % add connected nodes to the queue
+        append(Q,[{{X2,Y2},{I,J}}],Q2),
+        Q := Q2
+      end
+    end,
+  end,
+
+  expand_region(G,Q,All_edges,C,Region).

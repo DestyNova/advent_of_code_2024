@@ -1,0 +1,4 @@
+.B.
+BBB
+B.B
+BBB

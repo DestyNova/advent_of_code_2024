@@ -1,0 +1,32 @@
+main =>
+  G = read_file_lines(),
+  Regs = find_all(X,find_region(G,C,X)).remove_dups,
+  [A*P : {_,A,P} in Regs].sum.println.
+
+find_region(G,C,R) ?=>
+  nth(Y,G,Row),
+  nth(X,Row,C),
+  Start = {X,Y},
+  Region = new_set(),
+  expand_region(G,Start,C,Region,Perimeter),
+  First_loc = Region.keys.sort.head,
+  R = {First_loc,Region.size,Perimeter}.
+
+in_bounds({X,Y},G) =>
+  nth(Y,G,R),
+  nth(X,R,_).
+
+expand_region(G,{X,Y},C,Region,Perimeter) =>
+  Region.put({X,Y},C),
+  Empty_sides = 4,
+  foreach ({I,J} in [{1,0},{0,1},{-1,0},{0,-1}])
+    {X2,Y2} = {X+I,Y+J},
+    if in_bounds({X2,Y2},G) && C == G[Y2,X2] then
+      Empty_sides := Empty_sides - 1,
+      if not Region.has_key({X2,Y2}) then
+        expand_region(G,{X2,Y2},C,Region,Rest_perimeter),
+        Empty_sides := Empty_sides + Rest_perimeter
+      end
+    end
+  end,
+  Perimeter = Empty_sides.
