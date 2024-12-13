@@ -1,0 +1,43 @@
+import cp.
+import util.
+
+main =>
+  D0 = [S : L in read_file_lines(), process(L,S)],
+  D = [{X,Y} : {X,Y} in D0],
+
+  Total = 0,
+
+  foreach (I in 1..D.len//3)
+    J = (I-1)*3,
+    {Xa,Ya} = D[J+1],
+    {Xb,Yb} = D[J+2],
+    {Xp,Yp} = D[J+3],
+    if go(Xa,Ya,Xb,Yb,Xp,Yp,T) then
+      Total := Total + T
+    end,
+  end,
+  println(Total).
+
+go(Xa,Ya,Xb,Yb,Xp,Yp,Tn) =>
+  Na :: 0..2**63,
+  Nb :: 0..2**63,
+  Na * Xa + Nb * Xb #= Xp,
+  Na * Ya + Nb * Yb #= Yp,
+  Tn :: 0..2**63,
+  Tn #= 3*Na + Nb,
+
+  Vars = [Na,Nb,Tn],
+  solve($[min(Tn)], Vars).
+
+process("",D) ?=> D = [].
+process(L,D) ?=>
+  append("Prize",_,L),
+  Ds = L.split("=,"),
+  [_,X,_,Y] = Ds,
+  D = {X.to_int+10000000000000,Y.to_int+10000000000000}.
+
+process(L,D) ?=>
+  append("Button ",_,L),
+  Ds = L.split("+,"),
+  [_,X,_,Y] = Ds,
+  D = {X.to_int,Y.to_int}.
