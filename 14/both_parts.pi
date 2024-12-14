@@ -1,0 +1,31 @@
+import regex.
+
+main => go(100).                   % part 1
+main(Step) => Step.head.to_int.go. % part 2
+
+go(Step) =>
+  W = 101,
+  H = 103,
+  M = read_file_chars().process,
+  M2 = new_map(),
+
+  foreach (Ns in M)
+    [Px,Py,Vx,Vy] = Ns.map(to_int),
+    C = {(Px+(Vx+W)*Step) mod W, (Py+(Vy+H)*Step) mod H},
+    M2.put(C, M2.get(C,0) + 1)
+  end,
+
+  Q = {0,0,0,0},
+  foreach (J in 0..H-1, I in 0..W-1, I != (W-1)//2, J != (H-1)//2)
+    Qx = cond(I < (W-1)//2, 0, 1),
+    Qy = cond(J < (H-1)//2, 0, 1),
+    Q[Qx + 2*Qy + 1] := Q[Qx + 2*Qy + 1] + M2.get({I,J},0),
+    if I == 0 then
+      nl
+    end,
+    print(M2.get({I,J},'.'))
+  end,
+  nl,
+  printf("Step %w, safety factor: %w\n", Step, Q[1]*Q[2]*Q[3]*Q[4]).
+
+process(L) = regex_find_all("p=(\\d+),(\\d+) v=(-?\\d+),(-?\\d+)", L).
