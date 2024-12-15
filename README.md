@@ -17,12 +17,12 @@ My solutions for the [Advent of Code 2024](https://adventofcode.com/2024/) progr
 ───────────────────────────────────────────────────────────────────────────────
 Language                     Files       Lines     Blanks    Comments      Code
 ───────────────────────────────────────────────────────────────────────────────
-Picat                           33        1119        165          25       929
+Picat                           36        1400        200          48      1152
 Shell                            1          17          1           1        15
 ───────────────────────────────────────────────────────────────────────────────
-Total                           34        1136        166          26       944
+Total                           37        1417        201          49      1167
 ───────────────────────────────────────────────────────────────────────────────
-Processed 24981 bytes, 0.025 megabytes (SI)
+Processed 31467 bytes, 0.031 megabytes (SI)
 ───────────────────────────────────────────────────────────────────────────────
 ```
 
@@ -41,7 +41,7 @@ Processed 24981 bytes, 0.025 megabytes (SI)
 * Day 11: [Plutonian Pebbles](https://github.com/DestyNova/advent_of_code_2024/blob/main/11)
 * Day 12: [Claw Contraption](https://github.com/DestyNova/advent_of_code_2024/blob/main/12)
 * Day 13: [Restroom Redoubt](https://github.com/DestyNova/advent_of_code_2024/blob/main/13)
-* Day 14: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/14)
+* Day 14: [Warehouse Woes](https://github.com/DestyNova/advent_of_code_2024/blob/main/14)
 * Day 15: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/15)
 * Day 16: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/16)
 * Day 17: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/17)

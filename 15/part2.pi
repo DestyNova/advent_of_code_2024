@@ -1,0 +1,114 @@
+import util.
+
+main =>
+  {G0,Moves} = read_file_lines().process,
+  G1 = G0.map(update),
+  show(G1),
+  find_thing(G1,'@',S0),
+
+  Boxes = find_all(P, find_thing(G1,'[',P)).new_set,
+  G = G1.map(erase_boxes),
+  foreach (Move in Moves)
+    step(Move, G, Boxes, S0, S1),
+    %show(G,Boxes,Move),
+    S0 := S1,
+  end,
+  show(G,Boxes,'@'),
+  [X-1 + 100*(Y-1) : {X,Y} in Boxes.keys].sum.println.
+
+show(G,Boxes,Move) =>
+  foreach (J in 1..G.len)
+    foreach (I in 1..G[1].len)
+      if Boxes.has_key({I,J}) then
+        print("["),
+      elseif Boxes.has_key({I-1,J}) then
+        print("]"),
+      elseif G[J,I] == '@' then
+        print(Move)
+      else
+        print(G[J,I])
+      end,
+    end,
+    nl
+  end.
+
+show(G) => show(G,'@').
+show(G,C) =>
+  foreach (L in G)
+    println(L.replace('@',C))
+  end,
+  nl.
+
+find_thing(G,C,S0) ?=>
+  nth(Y,G,Row),
+  nth(X,Row,C),
+  S0 = {X,Y}.
+
+get_move('<') = {-1,0}.
+get_move('>') = {1,0}.
+get_move('^') = {0,-1}.
+get_move('v') = {0,1}.
+
+step(Move,G,Boxes,{X,Y},S1) ?=>
+  G[Y,X] == '@',
+  {I,J} = get_move(Move),
+
+  {X2,Y2} = {X+I,Y+J},
+  G[Y2,X2] != '#',
+  push_boxes(Move,G,Boxes,{X2,Y2}),
+  G[Y2,X2] != '#',
+  % do the move
+  G[Y,X] := '.',
+  G[Y+J,X+I] := '@',
+  S1 = {X+I,Y+J}.
+
+step(Move,G,Boxes,{X,Y},S1) ?=> S1 = {X,Y}.
+
+% trivial case: no box
+push_boxes(Move,G,Boxes,{X,Y}) ?=> G[Y,X] = '.', not (Boxes.has_key({X,Y}); Boxes.has_key({X-1,Y})) .
+push_boxes('<',G,Boxes,{X,Y}) ?=> G[Y,X] = '.', not Boxes.has_key({X-1,Y}).
+push_boxes('>',G,Boxes,{X,Y}) ?=> G[Y,X] = '.', not Boxes.has_key({X,Y}).
+% easy case: horizontal
+push_boxes('<',G,Boxes,{X,Y}) ?=>
+  P = {X-1,Y},
+  P2 = {X-2,Y},
+  Boxes.has_key(P),
+  Boxes.del(P),
+  push_boxes('<',G,Boxes,P2),
+  Boxes.put(P2).
+push_boxes('>',G,Boxes,{X,Y}) ?=>
+  P = {X,Y},
+  P2 = {X+1,Y},
+  P3 = {X+2,Y},
+  Boxes.has_key(P),
+  Boxes.del(P),
+  push_boxes('>',G,Boxes,P3),
+  Boxes.put(P2).
+
+% weird case: vertical
+push_boxes(Move,G,Boxes,{X,Y}) ?=>
+  member(Move, "^v"),
+  {_,J} = get_move(Move),
+
+  % moving left, slide box cursor one more left
+  foreach (I in [-1,0])
+    P = {X+I,Y},
+    X2 = X+I,   Y2 = Y+J,
+    X3 = X+I+1, Y3 = Y+J,
+    P2 = {X2,Y2},
+    if Boxes.has_key(P) then
+      G[Y2,X2] != '#',
+      G[Y3,X3] != '#',
+      Boxes.del(P),
+      push_boxes(Move,G,Boxes,P2),
+      push_boxes(Move,G,Boxes,{X3,Y3}),
+      Boxes.put(P2),
+    end
+  end.
+
+process(Ls) = process(Ls,[]).
+process([""|Ls],G) = {G.reverse,Ls.flatten}.
+process([L|Ls],G) = process(Ls,[L|G]).
+
+update(G) = G.replace('#',"##").flatten.replace('O',"[]").flatten.replace('.',"..").flatten.replace('@',"@.").flatten.
+erase_boxes(G) = G.replace('[','.').replace(']','.').

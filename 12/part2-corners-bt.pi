@@ -1,3 +1,5 @@
+import ordset.
+
 main =>
   G = read_file_lines(),
   Regs = find_all(X,find_region(G,C,X)),
@@ -10,7 +12,15 @@ find_region(G,C,R) ?=>
   not get_global_map(visited).has_key(Start),
   Region = new_set(),
   expand_region(G,[Start],0,C,Region,Perimeter),
-  println(p=Perimeter),
+
+  Corners = 0,
+  foreach (P in Region.keys)
+    Cs = find_all(P2,corner(P,Region,P2)),
+    Corners := Corners + Cs.remove_dups.len,
+  end,
+  println(corners=Corners),
+  Perimeter := Corners,
+
   First_loc = Region.keys.sort.head,
   R = {C,First_loc,Region.size,Perimeter}.
 
@@ -38,15 +48,27 @@ expand_region(G,[{X,Y}|Q],Edges,C,Region,All_edges) =>
         Q := Q2
       end
     end,
-
-    % count disconnected corners... there must be a nicer way
-    Ls = [{{-1,0},{-1,-1},{0,-1}},{{0,-1},{1,-1},{1,0}},{{1,0},{1,1},{0,1}},{{0,1},{-1,1},{-1,0}}],
-    foreach (L in Ls)
-      Empties = [cond(empty({X+I,Y+J},C,G), 1, 0) : {I,J} in L],
-      if member(Empties, [[1,_,1], [0,1,0]]) then
-        Corners := Corners + 1
-      end
-    end
   end,
 
   expand_region(G,Q,Edges + Corners,C,Region,All_edges).
+
+corner({X,Y},Region,P2) ?=>
+  println(c={X,Y,Region}),
+  member(I,[-1,1]),
+  member(J,[-1,1]),
+  P2 = {X+I,Y+J},
+  % no corner cell, or no neighbour of this cell is a neighbour of the corner cell
+  not (
+    Region.has_key(P2),
+    Ns = find_all(P,neighbour({X,Y},Region,P)).new_ordset,
+    Corner_ns = find_all(P3,neighbour(P2,Region,P3)).new_ordset,
+    Ns.intersection(Corner_ns).len > 0
+    ),
+  println(corner_found=P2).
+
+neighbour({X,Y},Region,P) ?=>
+  between(-1,1,I),
+  between(-1,1,J),
+  (I == 0 ; J == 0),
+  P = {X+I,Y+J},
+  Region.has_key(P).

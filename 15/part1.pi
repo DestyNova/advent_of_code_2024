@@ -1,0 +1,57 @@
+import util.
+
+main =>
+  {G,Moves} = read_file_lines().process,
+  show(G),
+  find_thing(G,'@',S0),
+  foreach (Move in Moves)
+    step(Move, G, S0, S1),
+    %show(G,Move),
+    S0 := S1,
+  end,
+  show(G),
+
+  Boxes = find_all(P, find_thing(G,'O',P)),
+  [(X-1) + 100*(Y-1) : {X,Y} in Boxes].sum.println.
+
+show(G) => show(G,'@').
+show(G,C) =>
+  foreach (L in G)
+    println(L.replace('@',C))
+  end,
+  nl.
+
+find_thing(G,C,S0) ?=>
+  nth(Y,G,Row),
+  nth(X,Row,C),
+  S0 = {X,Y}.
+
+get_move('<') = {-1,0}.
+get_move('>') = {1,0}.
+get_move('^') = {0,-1}.
+get_move('v') = {0,1}.
+
+step(Move,G,{X,Y},S1) ?=>
+  G[Y,X] == '@',
+  {I,J} = get_move(Move),
+  {X2,Y2} = {X+I,Y+J},
+  D = 1,
+  while (G[Y2,X2]=='O')
+    D := D + 1,
+    X2 := X+I*D,
+    Y2 := Y+J*D,
+  end,
+  G[Y2,X2] == '.',
+  % do the move
+  G[Y,X] := '.',
+  G[Y+J,X+I] := '@',
+  if D > 1 then
+    G[Y2,X2] := 'O'
+  end,
+  S1 = {X+I,Y+J}.
+
+step(Move,G,{X,Y},S1) ?=> S1 = {X,Y}.
+
+process(Ls) = process(Ls,[]).
+process([""|Ls],G) = {G.reverse,Ls.flatten}.
+process([L|Ls],G) = process(Ls,[L|G]).
