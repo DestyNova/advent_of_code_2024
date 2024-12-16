@@ -1,6 +1,6 @@
 main =>
   G = read_file_lines(),
-  %show(G),
+  %G.map(println), nl,
   find_thing(G,'S',{Sx,Sy}),
   find_thing(G,'E',{Ex,Ey}),
 
@@ -35,8 +35,6 @@ dijkstra(G,Start,Init_cost,Successor_fn,Dists) =>
       end,
     end,
   end.
-
-show(G) => G.map(println), nl.
 
 find_thing(G,C,S0) ?=>
   nth(Y,G,Row),
