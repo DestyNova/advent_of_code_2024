@@ -1,0 +1,71 @@
+% Works on the sample inputs, didn't complete after 13 hours on the real input
+import planner.
+import util.
+
+main =>
+  G = read_file_lines(),
+  show(G),
+  find_thing(G,'S',{Sx,Sy}),
+  find_thing(G,'E',{Ex,Ey}),
+  get_global_map(grid).put(1,G),
+
+  garbage_collect(2000000000),
+  % best cost of 65436 established from part 1
+  Plans = find_all(Plan, best_plan_nondet({Sx,Sy,Ex,Ey,e},65436,Plan,C)),
+  M = new_set([{Sx,Sy}]),
+  foreach (Plan in Plans)
+    walk(Plan,Sx,Sy,Ex,Ey,e,M)
+  end,
+  println(M.keys.len).
+
+show(G) =>
+  foreach (L in G)
+    println(L)
+  end,
+  nl.
+
+find_thing(G,C,S0) ?=>
+  nth(Y,G,Row),
+  nth(X,Row,C),
+  S0 = {X,Y}.
+
+move(X,Y,n) = {X,Y-1,n}.
+move(X,Y,e) = {X+1,Y,e}.
+move(X,Y,s) = {X,Y+1,s}.
+move(X,Y,w) = {X-1,Y,w}.
+right(n) = e.
+right(e) = s.
+right(s) = w.
+right(w) = n.
+left(D) = D.right.right.right.
+
+final({Sx,Sy,Ex,Ey,_}) => Sx = Ex, Sy = Ey, current_resource_plan_cost(_,_,C),C.println.
+
+table
+action({Sx,Sy,Ex,Ey,D}, S1, Action, Cost) ?=>
+  (Action = f ; Action = l ; Action = r),
+  G = get_global_map(grid).get(1),
+  {Lx,Ly,_} = move(Sx,Sy,D.left),
+  {Rx,Ry,_} = move(Sx,Sy,D.right),
+  if G[Ly,Lx] == '#' && G[Ry,Rx] == '#' then
+    Action == f
+  end,
+  (
+    (Action == f, {X,Y,D2} = move(Sx,Sy,D), Cost=1);
+    (Action == r, {X,Y,D2} = {Sx,Sy,right(D)}, Cost=1000);
+    (Action == l, {X,Y,D2} = {Sx,Sy,left(D)}, Cost=1000)
+  ),
+  S1 = {X,Y,Ex,Ey,D2},
+  nth(Y,G,Row),
+  nth(X,Row,C),
+  member(C,".ES").
+
+heuristic({Sx,Sy,Ex,Ey,_}) = abs(Sx-Ex) + abs(Sy-Ey) + cond((Sx == Ex || Sy == Ey), 0, 1000).
+
+walk([],Sx,Sy,Ex,Ey,D,M) => true.
+walk([l|Plan],Sx,Sy,Ex,Ey,D,M) => walk(Plan,Sx,Sy,Ex,Ey,left(D),M).
+walk([r|Plan],Sx,Sy,Ex,Ey,D,M) => walk(Plan,Sx,Sy,Ex,Ey,right(D),M).
+walk([f|Plan],Sx,Sy,Ex,Ey,D,M) =>
+  {X,Y,D2} = move(Sx,Sy,D),
+  M.put({X,Y}),
+  walk(Plan,X,Y,Ex,Ey,D2,M).
