@@ -36,11 +36,7 @@ dijkstra(G,Start,Init_cost,Successor_fn,Dists) =>
     end,
   end.
 
-show(G) =>
-  foreach (L in G)
-    println(L)
-  end,
-  nl.
+show(G) => G.map(println), nl.
 
 find_thing(G,C,S0) ?=>
   nth(Y,G,Row),
