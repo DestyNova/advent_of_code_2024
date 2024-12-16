@@ -68,7 +68,7 @@ successor(Sx,Sy,D,G,S1,Cost) ?=>
     (Action == r, {X,Y,D2} = {Sx,Sy,right(D)}, Cost=1000);
     (Action == l, {X,Y,D2} = {Sx,Sy,left(D)}, Cost=1000)
   ),
-  S1 = {X,Y,D2},
   nth(Y,G,Row),
   nth(X,Row,C),
-  member(C,".ES").
+  member(C,".ES"),
+  S1 = {X,Y,D2}.
