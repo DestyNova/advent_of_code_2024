@@ -17,12 +17,12 @@ My solutions for the [Advent of Code 2024](https://adventofcode.com/2024/) progr
 ───────────────────────────────────────────────────────────────────────────────
 Language                     Files       Lines     Blanks    Comments      Code
 ───────────────────────────────────────────────────────────────────────────────
-Picat                           41        1721        243          49      1429
+Picat                           47        2249        300          88      1861
 Shell                            1          17          1           1        15
 ───────────────────────────────────────────────────────────────────────────────
-Total                           42        1738        244          50      1444
+Total                           48        2266        301          89      1876
 ───────────────────────────────────────────────────────────────────────────────
-Processed 40063 bytes, 0.040 megabytes (SI)
+Processed 76151 bytes, 0.076 megabytes (SI)
 ───────────────────────────────────────────────────────────────────────────────
 ```
 
@@ -44,7 +44,7 @@ Processed 40063 bytes, 0.040 megabytes (SI)
 * Day 14: [Restroom Redoubt](https://github.com/DestyNova/advent_of_code_2024/blob/main/14)
 * Day 15: [Warehouse Woes](https://github.com/DestyNova/advent_of_code_2024/blob/main/15)
 * Day 16: [Reindeer Maze](https://github.com/DestyNova/advent_of_code_2024/blob/main/16)
-* Day 17: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/17)
+* Day 17: [Chronospatial Computer](https://github.com/DestyNova/advent_of_code_2024/blob/main/17)
 * Day 18: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/18)
 * Day 19: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/19)
 * Day 20: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/20)

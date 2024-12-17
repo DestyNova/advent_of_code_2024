@@ -1,0 +1,102 @@
+import cp.
+import util.
+
+main =>
+  {_,B,C,P} = read_file_lines().parse,
+  go(B,C,P).
+
+go(Bi,Ci,P) =>
+  T = 10000, % need to guess how long it takes
+  A = new_array(T),
+  B = new_array(T),
+  C = new_array(T),
+  [A,B,C] :: 0..2**53,
+  IP = new_array(T),
+  IP :: 0..P.len+1,
+  %A[1] #= 117440, % test
+  B[1] = Bi,
+  C[1] = Ci,
+  IP[1] = 0,
+  Outs = new_array(T,P.len),
+  foreach (I in 1..P.len)
+    Outs[1,I] #= -1
+  end,
+  Out_count = new_array(T),
+  Out_count :: 0..P.len,
+  Out_count[1] #= 0,
+
+  foreach (I in 2..T)
+    step(A[I-1],B[I-1],C[I-1],P,IP[I-1],{A2,B2,C2,IP2,Out}),
+    % copy Out onto last outs
+    Out_count[I] #= Out_count[I-1] + cond(Out #< 0, 0, 1),
+    foreach (J in 1..P.len)
+      Outs[I,J] #= cond(J #= Out_count[I] #/\ Out #>= 0, Out, Outs[I-1,J])
+    end,
+    % update everything
+    A[I] #= A2,
+    B[I] #= B2,
+    C[I] #= C2,
+    IP[I] #= IP2
+  end,
+
+  Out_count[T] #= P.len,
+  foreach (I in 1..P.len)
+    Outs[T,I] #= P[I]
+  end,
+
+  %Vars = [A,B,C,IP,Outs,Out_count],
+  solve([$min(A[1]),ff,split,$report(printf("A: %d\n",A[1]))], A),
+  println(solving),
+  println(A[1]).
+
+step(A,B,C,P,IP,R) =>
+  Cmd :: 0..8,
+  In_range :: 0..1,
+  In_range #= cond(IP+2 #<= P.len, 1, 0),
+  IP_i #= cond(In_range, IP+1, 1),
+  element(IP_i,P,Cmd1),
+  Cmd #= cond(In_range, Cmd1, 8), % halt if not in range
+  Op_i #= cond(In_range, IP+2, 1),
+  element(Op_i,P,Oper1),
+  Oper #= cond(In_range, Oper1, 0), % halt if not in range
+  R1 = stepper(Cmd,Oper,A,B,C,P,IP),
+  {A2,B2,C2,IP2,Out} = R1,
+  R = {A2,B2,C2,IP2,Out}.
+
+stepper(Cmd,Oper,A,B,C,P,IP) = R =>
+  [A2,B2,C2,IP2,Out] :: -1..2**54,
+  Oper.combo(A,B,C,Combo),
+  Cmd #= 8 #=> A2 #= A #/\ B2 #= B #/\ C2 #= C #/\ IP2 #= IP #/\ Out #= -1, % HALT
+  Pow :: 0..2**63,
+  Pow_combo :: 0..54,
+  Pow_combo #= cond(Combo #< 54, Combo, 54),
+  Pow #= 2**Pow_combo,
+  IP2 #= cond((Cmd #= 3 #/\ A #> 0), Oper, cond(Cmd #= 8, IP, IP+2)),
+  Cmd #= 0 #=> A2 #= A // Pow #/\ B2 #= B #/\ C2 #= C #/\ Out #= -1,
+  Xor_BO = xor(B,Oper),
+  Cmd #= 1 #=> A2 #= A #/\ B2 #= Xor_BO #/\ C2 #= C #/\ Out #= -1,
+  Cmd #= 2 #=> A2 #= A #/\ B2 #= Combo mod 8 #/\ C2 #= C #/\ Out #= -1,
+  (Cmd #= 3 #/\ A #= 0) #=> A2 #= 0 #/\ B2 #= B #/\ C2 #= C #/\ Out #= -1,
+  (Cmd #= 3 #/\ A #> 0) #=> A2 #= A #/\ B2 #= B #/\ C2 #= C #/\ Out #= -1,
+  Xor_BC = xor(B,C),
+  Cmd #= 4 #=> A2 #= A #/\ B2 #= Xor_BC #/\ C2 #= C #/\ Out #= -1,
+  M #= Combo mod 8,
+  %Cmd #= 5 #=> A2 #= A #/\ B2 #= B #/\ C2 #= C #/\ Out #= M,
+  Cmd #= 5 #=> A2 #= A #/\ B2 #= B #/\ C2 #= C #/\ Out #= M,
+  Cmd #= 6 #=> A2 #= A #/\ B2 #= A // Pow #/\ C2 #= C #/\ Out #= -1,
+  Cmd #= 7 #=> A2 #= A #/\ B2 #= B #/\ C2 #= A // Pow #/\ Out #= -1,
+  R = {A2,B2,C2,IP2,Out}.
+
+xor(A,B) = R => R #= A + B - A*B * (1 + A + B - A*B).
+
+combo(Oper,A,B,C,X) =>
+  X :: 0..2**32,
+  Oper #< 4 #=> X #= Oper,
+  Oper #= 4 #=> X #= A,
+  Oper #= 5 #=> X #= B,
+  Oper #= 6 #=> X #= C,
+  Oper #!= 7.
+
+parse(D) = {A,B,C,P} =>
+  [A,B,C] = [L.split(":").reverse.head.to_int : L in [D[1],D[2],D[3]]],
+  P = D[D.len].split(":").reverse.head.split(",").map(to_int).

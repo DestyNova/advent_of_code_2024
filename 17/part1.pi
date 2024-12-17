@@ -1,0 +1,38 @@
+import util.
+
+main =>
+  {A,B,C,P} = read_file_lines().parse,
+  get_global_map(out).put(1,[]),
+  {A2,B2,C2,IP2} = run(A,B,C,P,0),
+  println(get_global_map(out).get(1).reverse).
+
+run(A,B,C,P,IP) = R =>
+  Cmd = P[IP+1],
+  Oper = P[IP+2],
+  {A2,B2,C2,IP2} = step(Cmd,Oper,A,B,C,P,IP),
+  New_IP = cond(IP2 == no, IP+2, IP2),
+  R = cond(New_IP > P.len-1, {A2,B2,C2,New_IP}, run(A2,B2,C2,P,New_IP)).
+
+step(0,Oper,A,B,C,P,IP) = {floor(A / 2**Oper.combo(A,B,C)), B, C,no}.
+step(1,Oper,A,B,C,P,IP) = {A,B^Oper,C,no}.
+step(2,Oper,A,B,C,P,IP) = {A,Oper.combo(A,B,C) mod 8,C,no}.
+step(3,Oper,0,B,C,P,IP) = {0,B,C,no}.
+step(3,Oper,A,B,C,P,IP) = {A,B,C,Oper}.
+step(4,Oper,A,B,C,P,IP) = {A,B^C,C,no}.
+step(5,Oper,A,B,C,P,IP) = R =>
+  output(Oper.combo(A,B,C) mod 8),
+  R = {A,B,C,no}.
+step(6,Oper,A,B,C,P,IP) = {A,floor(A / 2**Oper.combo(A,B,C)),C,no}.
+step(7,Oper,A,B,C,P,IP) = {A,B,floor(A / 2**Oper.combo(A,B,C)),no}.
+
+output(X) => get_global_map(out).put(1,[X | get_global_map(out).get(1)]).
+
+combo(4,A,B,C) = A.
+combo(5,A,B,C) = B.
+combo(6,A,B,C) = C.
+combo(7,A,B,C) = R => println(bad_combo={A,B,C}), exit(1).
+combo(N,_,_,_) = N.
+
+parse(D) = {A,B,C,P} =>
+  [A,B,C] = [L.split(":").reverse.head.to_int : L in [D[1],D[2],D[3]]],
+  P = D[D.len].split(":").reverse.head.split(",").map(to_int).

@@ -1,0 +1,57 @@
+import util.
+
+main =>
+  % parse
+  {_,B,C,P} = read_file_lines().parse,
+  % read insn + operand
+  Prev = 0,
+  % cycle 1, 1,1,1,1,1,1,1,57
+  foreach (A in 1..2**48)
+    if A mod 100000 == 0 then
+      garbage_collect(200000000),
+      println(A),
+    end,
+    run(A,B,C,P,0,[],R),
+    {A2,B2,C2,IP2,Out} = R,
+    if Out.reverse == P then
+      println(A),
+      exit
+    end
+  end.
+
+run(A,B,C,P,IP,Out,R) ?=>
+  (Out.len = P.len), % ; (Out.len > 0 && P[1] != Out.last)),
+  R = {A,B,C,IP,Out}.
+
+run(A,B,C,P,IP,Out,R) =>
+  Cmd = P[IP+1],
+  Oper = P[IP+2],
+  %println(insn=[Cmd,Oper]),
+  {A2,B2,C2,IP2,Out2} = step(Cmd,Oper,A,B,C,P,IP,Out),
+  New_IP = cond(IP2 == no, IP+2, IP2),
+  %println(new={Cmd,Oper,A2,B2,C2,New_IP,IP}),
+  if New_IP > P.len-1 then
+    R = {A2,B2,C2,New_IP,Out2}
+  else
+    run(A2,B2,C2,P,New_IP,Out2,R),
+  end.
+
+step(0,Oper,A,B,C,P,IP,Out) = {floor(A / 2**Oper.combo(A,B,C)), B, C,no,Out}.
+step(1,Oper,A,B,C,P,IP,Out) = {A,B^Oper,C,no,Out}.
+step(2,Oper,A,B,C,P,IP,Out) = {A,Oper.combo(A,B,C) mod 8,C,no,Out}.
+step(3,Oper,0,B,C,P,IP,Out) = {0,B,C,no,Out}.
+step(3,Oper,A,B,C,P,IP,Out) = {A,B,C,Oper,Out}.
+step(4,Oper,A,B,C,P,IP,Out) = {A,B^C,C,no,Out}.
+step(5,Oper,A,B,C,P,IP,Out) = {A,B,C,no,[Oper.combo(A,B,C) mod 8|Out]}.
+step(6,Oper,A,B,C,P,IP,Out) = {A,floor(A / 2**Oper.combo(A,B,C)),C,no,Out}.
+step(7,Oper,A,B,C,P,IP,Out) = {A,B,floor(A / 2**Oper.combo(A,B,C)),no,Out}.
+
+combo(4,A,B,C) = A.
+combo(5,A,B,C) = B.
+combo(6,A,B,C) = C.
+combo(7,A,B,C) = R => println(bad_combo={A,B,C}), exit(1).
+combo(N,_,_,_) = N.
+
+parse(D) = {A,B,C,P} =>
+  [A,B,C] = [L.split(":").reverse.head.to_int : L in [D[1],D[2],D[3]]],
+  P = D[D.len].split(":").reverse.head.split(",").map(to_int).
