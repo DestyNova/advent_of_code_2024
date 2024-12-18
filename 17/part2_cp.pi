@@ -6,7 +6,8 @@ main =>
   go(B,C,P).
 
 go(Bi,Ci,P) =>
-  T = 10000, % need to guess how long it takes
+  garbage_collect(200000000),
+  T = 800, % need to guess how long it takes
   A = new_array(T),
   B = new_array(T),
   C = new_array(T),

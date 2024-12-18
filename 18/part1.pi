@@ -1,0 +1,51 @@
+import util.
+
+main =>
+  Bs = read_file_lines().map(process),
+  Steps = 1024,
+  G = new_set(),
+  D = 70,
+  foreach ([X,Y] in Bs.take(Steps))
+    G.put({X,Y}),
+  end,
+  Start = {0,0},
+  End = {D,D},
+
+  Dists = new_map(),
+
+  % find cheapest costs from start to all reachable nodes
+  dijkstra(G,Start,0,successors,Dists),
+  Best_cost = Dists.get(End),
+  println(dijkstra_best=Best_cost).
+
+dijkstra(G,Start,Init_cost,Successor_fn,Dists) =>
+  Q = new_min_heap([{Init_cost,Start}]),
+  Dists.put(Start, 0),
+  Seen = new_set(),
+  Inf = maxint_small(),
+
+  while (Q.heap_size() > 0)
+    {Cost,S} = Q.heap_pop(),
+    if not(Seen.has_key(S)) then
+      Seen.put(S),
+      {X,Y} = S,
+      foreach ({S1,Move_cost} in apply(Successor_fn,X,Y,G))
+        Dists.put(S1, min(Dists.get(S1,Inf), Cost+Move_cost)),
+        Q.heap_push({Cost+Move_cost,S1})
+      end,
+    end,
+  end.
+
+moves(X,Y) = [{X+1,Y},{X-1,Y},{X,Y+1},{X,Y-1}].
+
+successors(X,Y,G) = find_all({S1,Cost}, successor(X,Y,G,S1,Cost)).
+
+successor(X,Y,G,S1,Cost) ?=>
+  member({X2,Y2}, moves(X,Y)),
+  between(0,70,X2),
+  between(0,70,Y2),
+  not G.has_key({X2,Y2}),
+  Cost = 1,
+  S1 = {X2,Y2}.
+
+process(L) = L.split(",").map(to_int).

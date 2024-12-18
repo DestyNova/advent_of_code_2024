@@ -1,0 +1,70 @@
+import util.
+
+main =>
+  Bs = read_file_lines().map(process),
+  Steps = 1024,
+  D = 70,
+  Start = {0,0},
+  End = {D,D},
+  Lo = 1,
+  Hi = Bs.len,
+  while (Lo < Hi)
+    Mid = (Lo+Hi)//2,
+    printf("Binary search: %w < %w < %w\n",Lo,Mid,Hi),
+    G = new_set(),
+    I = 0,
+    foreach ([X,Y] in Bs.take(Mid))
+      G.put({X,Y}),
+      I := I + 1,
+    end,
+
+    Dists = new_map(),
+    dijkstra(G,Start,0,successors,Dists),
+    if Dists.has_key(End) then
+      Lo := Mid+1,
+      println("Reachable")
+    else
+      Hi := Mid,
+      println("Not reachable")
+    end,
+  end,
+  % Lo points to the first blocking node
+  printf("Blocker: %w\n", Bs[Lo]).
+
+dijkstra(G,Start,Init_cost,Successor_fn,Dists) =>
+  Q = new_min_heap([{Init_cost,Start}]),
+  Dists.put(Start, 0),
+  Seen = new_set(),
+  Inf = maxint_small(),
+
+  while (Q.heap_size() > 0)
+    {Cost,S} = Q.heap_pop(),
+    if not(Seen.has_key(S)) then
+      Seen.put(S),
+      % successor function can be successors/2 (forward cost) or predecessors/2 (backward cost)
+      {X,Y} = S,
+      foreach ({S1,Move_cost} in apply(Successor_fn,X,Y,G))
+        Dists.put(S1, min(Dists.get(S1,Inf), Cost+Move_cost)),
+        Q.heap_push({Cost+Move_cost,S1})
+      end,
+    end,
+  end.
+
+moves(X,Y) = [{X+1,Y},{X-1,Y},{X,Y+1},{X,Y-1}].
+
+successors(X,Y,G) = find_all({S1,Cost}, successor(X,Y,G,S1,Cost)).
+predecessors({X,Y,D},G) = [{{Px,Py,Pd.right.right},Cost} : {{Px,Py,Pd},Cost} in find_all({S1,Cost}, successor(X,Y,D.right.right,G,S1,Cost))].
+
+successor(X,Y,G,S1,Cost) ?=>
+  %println(succ=[X,Y,G]),
+  member({X2,Y2}, moves(X,Y)),
+  between(0,70,X2),
+  between(0,70,Y2),
+  not G.has_key({X2,Y2}),
+  %nth(Y,G,Row),
+  %nth(X,Row,C),
+  %member(C,".ES"),
+  Cost = 1,
+  S1 = {X2,Y2}.
+
+process(L) = L.split(",").map(to_int).
