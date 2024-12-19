@@ -17,12 +17,12 @@ My solutions for the [Advent of Code 2024](https://adventofcode.com/2024/) progr
 ───────────────────────────────────────────────────────────────────────────────
 Language                     Files       Lines     Blanks    Comments      Code
 ───────────────────────────────────────────────────────────────────────────────
-Picat                           49        2352        317          94      1941
+Picat                           51        2378        323          94      1961
 Shell                            1          17          1           1        15
 ───────────────────────────────────────────────────────────────────────────────
-Total                           50        2369        318          95      1956
+Total                           52        2395        324          95      1976
 ───────────────────────────────────────────────────────────────────────────────
-Processed 78362 bytes, 0.078 megabytes (SI)
+Processed 78939 bytes, 0.079 megabytes (SI)
 ───────────────────────────────────────────────────────────────────────────────
 ```
 
@@ -46,7 +46,7 @@ Processed 78362 bytes, 0.078 megabytes (SI)
 * Day 16: [Reindeer Maze](https://github.com/DestyNova/advent_of_code_2024/blob/main/16)
 * Day 17: [Chronospatial Computer](https://github.com/DestyNova/advent_of_code_2024/blob/main/17)
 * Day 18: [RAM Run](https://github.com/DestyNova/advent_of_code_2024/blob/main/18)
-* Day 19: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/19)
+* Day 19: [Linen Layout](https://github.com/DestyNova/advent_of_code_2024/blob/main/19)
 * Day 20: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/20)
 * Day 21: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/21)
 * Day 22: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/22)

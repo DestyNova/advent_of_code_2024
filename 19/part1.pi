@@ -1,0 +1,14 @@
+import util.
+
+main =>
+  {Ps,Ds} = read_file_lines().process,
+  [1 : D in Ds, possible(D,Ps)].sum.println.
+
+table
+possible("",Ps) => true.
+possible(D,Ps) ?=>
+  member(Pre,Ps),
+  D.take(Pre.len) == Pre,
+  possible(D.drop(Pre.len),Ps).
+
+process([Ps_s,""|Ds]) = {Ps_s.split(", "), Ds}.
