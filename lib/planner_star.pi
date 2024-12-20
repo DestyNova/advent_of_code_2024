@@ -1,10 +1,10 @@
 module planner_star.
 
 best_plan_star(S0,Plan,Cost) =>
-  % TODO: check if heuristic is implemented, but how?
-  %Heuristic = cond(nonvar(heuristic), heuristic, no_heuristic),
+  Heuristic = cond(current_predicate(heuristic,1), heuristic, no_heuristic),
+  println(h=Heuristic),
   Dists = new_map(),
-  dijkstra(S0,0,action,final,heuristic,Final,Dists,Prevs),
+  dijkstra(S0,0,action,final,Heuristic,Final,Dists,Prevs),
   Plan = construct_plan(Final,Prevs,[]),
   Final != none,
   Cost = Dists.get(Final).
@@ -18,33 +18,42 @@ dijkstra(Start,Init_cost,Successor_fn,Final,Dists,Prevs) =>
 dijkstra(Start,Init_cost,Successor_fn,Final_fn,Heuristic_fn,Final,Dists,Prevs) =>
   Q = new_min_heap([{Init_cost,Start}]),
   Dists.put(Start, 0),
+  F_scores = new_map(),
+  F_scores.put(Start, apply(Heuristic_fn, Start)),
   Prevs = new_set(),
   Inf = maxint_small(),
   S_final = none,
 
   while (Q.heap_size() > 0 && S_final = none)
-    {Cost,S} = Q.heap_pop(),
+    {_,S} = Q.heap_pop(),
+    Cost = Dists.get(S),
     if call(Final_fn,S) then
-      S_final := S,
+      S_final := S
     else
 
       Successors = find_all({S1,Action,Move_cost}, call(Successor_fn,S,S1,Action,Move_cost)),
       foreach ({S1,Action,Move_cost} in Successors)
+        G_score = Cost+Move_cost,
         Cost_s1 = Dists.get(S1,Inf),
-        if Cost+Move_cost < Cost_s1 && not(Prevs.has_key(S1)) then
+        if G_score < Cost_s1 then %&& not(Prevs.has_key(S1)) then
+          % if Cost+Move_cost < Cost_s1 && not(Prevs.has_key(S1)) then
           Prevs.put(S1,{S,Action}),
-          Dists.put(S1, Cost+Move_cost),
-          Q.heap_push({Cost+Move_cost,S1})
-        end,
-      end,
-    end,
+          Dists.put(S1, G_score),
+          %F_scores.put(S1, Cost+Move_cost),
+          Q.heap_push({G_score + apply(Heuristic_fn, S1), S1})
+          %Q.heap_push({Cost+Move_cost,S1})
+        end
+      end
+    end
   end,
 
   Final = S_final. % why can't I update an "out" parameter with := directly?
 
-private
+% Can't make these private since they need to be visible to call and apply
 no_heuristic(_) = 0.
 no_final(_) => false.
+
+private
 
 successors(S,Ctx) = find_all({S1,Cost}, action(S,S1,Ctx,Cost)).
 
@@ -53,5 +62,9 @@ construct_plan(S,Prevs,Acc) = R =>
     {S0,Action} = Prevs.get(S),
     R = construct_plan(S0,Prevs,[Action|Acc])
   else
-    R = Acc,
+    R = Acc
   end.
+
+current_predicate(Pred,Arity) :-
+  P=to_fstring("e$$glb$$%w",Pred).to_atom,
+  bp.current_predicate($P/Arity).
