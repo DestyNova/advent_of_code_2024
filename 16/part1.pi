@@ -6,7 +6,7 @@ main =>
   %show(G),
   find_thing(G,'S',{Sx,Sy}),
   find_thing(G,'E',{Ex,Ey}),
-  get_global_map(grid).put(1,G),
+  get_heap_map(grid).put(1,G),
 
   garbage_collect(800000000),
   %best_plan_bin({Sx,Sy,Ex,Ey,e},Plan,C),
@@ -41,7 +41,7 @@ final({Sx,Sy,Ex,Ey,_}) => Sx = Ex, Sy = Ey.
 table
 action({Sx,Sy,Ex,Ey,D}, S1, Action, Cost) ?=>
   member(Action, [f,l,r]),
-  G = get_global_map(grid).get(1),
+  G = get_heap_map(grid).get(1),
   {Lx,Ly,_} = move(Sx,Sy,D.left),
   {Rx,Ry,_} = move(Sx,Sy,D.right),
   if G[Ly,Lx] == '#' && G[Ry,Rx] == '#' then

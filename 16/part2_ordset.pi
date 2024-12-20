@@ -7,7 +7,7 @@ main =>
   show(G),
   find_thing(G,'S',{Sx,Sy}),
   find_thing(G,'E',{Ex,Ey}),
-  get_global_map(grid).put(1,G),
+  get_heap_map(grid).put(1,G),
 
   garbage_collect(1000000000),
   V = new_ordset([{Sx,Sy}]),
@@ -47,7 +47,7 @@ final({Sx,Sy,Ex,Ey,_,_}) => Sx = Ex, Sy = Ey, current_resource_plan_cost(_,_,C),
 table
 action({Sx,Sy,Ex,Ey,D,V}, S1, Action, Cost) ?=>
   (Action = f ; Action = l ; Action = r),
-  G = get_global_map(grid).get(1),
+  G = get_heap_map(grid).get(1),
   {Lx,Ly,_} = move(Sx,Sy,D.left),
   {Rx,Ry,_} = move(Sx,Sy,D.right),
   if G[Ly,Lx] == '#' && G[Ry,Rx] == '#' then
