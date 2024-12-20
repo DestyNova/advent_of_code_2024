@@ -2,8 +2,9 @@ import util.
 
 main =>
   D = read_file_lines().map(process),
-  [N : {N,Xs} in D, go(N,0,Xs)].sum.println.
+  [N : {N,Xs} in D, go(N,Xs)].sum.println.
 
+go(N,Xs) => go(N,Xs.head,Xs.tail).
 go(N,N,[]).
 go(N,Acc,[X|Xs]) :-
   Acc <= N,

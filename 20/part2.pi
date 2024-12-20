@@ -10,13 +10,12 @@ main =>
 
   % all distances from start
   Dists = new_map(),
-  dijkstra({Sx,Sy},0,successor,G,Dists,_),
+  dijkstra({Sx,Sy},0,successor,_,Dists,_),
   Best_cost = Dists.get({Ex,Ey}),
   println(dijkstra_best=Best_cost),
   % all distances from end
   Rdists = new_map(),
-  %dijkstra({Ex,Ey},0,successors,G,Rdists),
-  dijkstra({Ex,Ey},0,successor,G,Rdists,_),
+  dijkstra({Ex,Ey},0,successor,_,Rdists,_),
 
   cheat(G,{Sx,Sy},{Ex,Ey},Dists,Rdists,Best_cost),
   println(get_global_map(res).size).
@@ -79,24 +78,6 @@ find_thing(G,C,S0) ?=>
   nth(Y,G,Row),
   nth(X,Row,C),
   S0 = {X,Y}.
-
-ndijkstra(G,Start,Init_cost,Successor_fn,Dists) =>
-  Q = new_min_heap([{Init_cost,Start}]),
-  Dists.put(Start, 0),
-  Seen = new_set(),
-  Inf = maxint_small(),
-
-  while (Q.heap_size() > 0)
-    {Cost,S} = Q.heap_pop(),
-    if not(Seen.has_key(S)) then
-      Seen.put(S),
-      {X,Y} = S,
-      foreach ({S1,Move_cost} in apply(Successor_fn,X,Y,G))
-        Dists.put(S1, min(Dists.get(S1,Inf), Cost+Move_cost)),
-        Q.heap_push({Cost+Move_cost,S1})
-      end,
-    end,
-  end.
 
 move({X,Y},n) = {X,Y-1}.
 move({X,Y},e) = {X+1,Y}.

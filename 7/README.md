@@ -17,7 +17,7 @@ The program still takes about 35 seconds with the built-in `sat` module, and no 
 
 #### Planner version
 
-For fun and curiosity I tried formulating part 2 as planning problem to be solved with Picat's built-in `planner` module. This was incredibly straightforward and concise, and produced the correct answer, albeit slowly at approx 11 seconds. The planner seems to require a **lot** of memory to do its things.
+For fun and curiosity I tried formulating part 2 as planning problem to be solved with Picat's built-in `planner` module. This was incredibly straightforward and concise, and produced the correct answer, albeit slowly at approx 9 seconds. The planner seems to require a **lot** of memory to do its things.
 
 #### Backtracking version
 

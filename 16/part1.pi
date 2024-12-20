@@ -1,4 +1,5 @@
-import planner.
+%import planner.
+import planner_star.
 
 main =>
   G = read_file_lines(),
@@ -8,7 +9,8 @@ main =>
   get_global_map(grid).put(1,G),
 
   garbage_collect(800000000),
-  best_plan_bin({Sx,Sy,Ex,Ey,e},Plan,C),
+  %best_plan_bin({Sx,Sy,Ex,Ey,e},Plan,C),
+  best_plan_star({Sx,Sy,Ex,Ey,e},Plan,C),
   println(Plan),
   println(C).
 
@@ -33,7 +35,8 @@ right(s) = w.
 right(w) = n.
 left(D) = D.right.right.right.
 
-final({Sx,Sy,Ex,Ey,_}) => Sx = Ex, Sy = Ey, current_resource_plan_cost(_,_,C),C.println.
+%final({Sx,Sy,Ex,Ey,_}) => Sx = Ex, Sy = Ey, current_resource_plan_cost(_,_,C),C.println.
+final({Sx,Sy,Ex,Ey,_}) => Sx = Ex, Sy = Ey.
 
 table
 action({Sx,Sy,Ex,Ey,D}, S1, Action, Cost) ?=>

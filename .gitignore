@@ -1,6 +1,7 @@
 part*
 !part*.*
 target
+*.qi
 __*
 input
 input_*
