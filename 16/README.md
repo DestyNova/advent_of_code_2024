@@ -31,6 +31,8 @@ At this point it was returning a node count that was too high, which puzzled me 
 
 Slow: 3.6s
 
+**(Update 2024-12-20)**: I swapped out the Dijkstra implementation for the more generic one in `../lib/planner_star.pi` and used heap maps instead of global maps to "pass" the grid into the `action` predicate. It's probably still more efficient to pass the grid in as a sort of context variable, but I wanted to keep it compatible with the existing `planner` API. Now it completes in 0.29s; not a bad speedup!
+
 ### Part 2
 
 ```
