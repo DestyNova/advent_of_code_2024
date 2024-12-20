@@ -1,0 +1,116 @@
+import planner_star.
+
+main =>
+  G = read_file_lines(),
+  find_thing(G,'S',{Sx,Sy}),
+  find_thing(G,'E',{Ex,Ey}),
+  get_global_map(grid).put(1,G),
+
+  garbage_collect(4000000000),
+
+  % all distances from start
+  Dists = new_map(),
+  dijkstra({Sx,Sy},0,successor,G,Dists,_),
+  Best_cost = Dists.get({Ex,Ey}),
+  println(dijkstra_best=Best_cost),
+  % all distances from end
+  Rdists = new_map(),
+  %dijkstra({Ex,Ey},0,successors,G,Rdists),
+  dijkstra({Ex,Ey},0,successor,G,Rdists,_),
+
+  cheat(G,{Sx,Sy},{Ex,Ey},Dists,Rdists,Best_cost),
+  println(get_global_map(res).size).
+  % 285 on sample.txt
+
+count_manhattan(A,B) = R =>
+  [C,D] = [A,B].sort,
+  R = count_manhattan_sorted(C,D).
+
+count_manhattan_sorted({X,Y},{X,Y}) = 1.
+count_manhattan_sorted({X,Y},{X2,Y2}) = R =>
+  R = cond(X>X2, 0, count_manhattan_sorted({X+1,Y},{X2,Y2})) +
+      cond(Y>Y2, 0, count_manhattan_sorted({X,Y+1},{X2,Y2})).
+
+cheat(G,Start,End,Dists,Rdists,Best_cost) ?=>
+  nth(Y,G,Row),
+  (nth(X,Row,'.') ; nth(X,Row,'S')),
+  A_cost = Dists.get({X,Y}),
+  A_cost < Best_cost,
+
+  Max_length = 20,
+  between(-20,20,I), % exit point
+  between(-20,20,J),
+  Manhattan = abs(I) + abs(J),
+  between(1,20,Manhattan),
+  nth(Y+J,G,R2),
+  nth(X+I,R2,C),
+  (C == '.' || C == 'E'),
+  B_cost = Rdists.get({X+I,Y+J}),
+  B_cost < Best_cost,
+
+  between(-1,1,I1), % first step, adjacent to "start" of path
+  between(-1,1,J1),
+  abs(I1) + abs(J1) = 1,
+  % first step should be within the cheat path (i.e. no doubling back)
+  Manhattan_s2 = abs(I-I1) + abs(J-J1),
+  Manhattan = 1 + Manhattan_s2,
+
+  Cost = A_cost + 1 + Manhattan_s2 + B_cost,
+  Saving = Best_cost - Cost,
+  Saving >= 100,
+  P1 = {X,Y},
+  P2 = {X+I,Y+J},
+  get_global_map(res).put({P1,P2}),
+  if get_global_map(res).size mod 500 == 0 then
+    garbage_collect(),
+    println(get_global_map(res).size)
+  end,
+  fail. % force enumeration of every possible result
+
+cheat(G,Start,End,Dists,Rdists,Best_cost) => true.
+
+show(G) =>
+  foreach (L in G)
+    println(L)
+  end,
+  nl.
+
+find_thing(G,C,S0) ?=>
+  nth(Y,G,Row),
+  nth(X,Row,C),
+  S0 = {X,Y}.
+
+ndijkstra(G,Start,Init_cost,Successor_fn,Dists) =>
+  Q = new_min_heap([{Init_cost,Start}]),
+  Dists.put(Start, 0),
+  Seen = new_set(),
+  Inf = maxint_small(),
+
+  while (Q.heap_size() > 0)
+    {Cost,S} = Q.heap_pop(),
+    if not(Seen.has_key(S)) then
+      Seen.put(S),
+      {X,Y} = S,
+      foreach ({S1,Move_cost} in apply(Successor_fn,X,Y,G))
+        Dists.put(S1, min(Dists.get(S1,Inf), Cost+Move_cost)),
+        Q.heap_push({Cost+Move_cost,S1})
+      end,
+    end,
+  end.
+
+move({X,Y},n) = {X,Y-1}.
+move({X,Y},e) = {X+1,Y}.
+move({X,Y},s) = {X,Y+1}.
+move({X,Y},w) = {X-1,Y}.
+
+successors(X,Y,G) = find_all({S1,Cost}, successor(X,Y,G,S1,Cost)).
+
+successor(P,S1,Action,Cost) ?=>
+  member(Action,[n,e,s,w]),
+  {X2,Y2} = move(P,Action),
+  G = get_global_map(grid).get(1),
+  nth(Y2,G,Row),
+  nth(X2,Row,C),
+  member(C,".SE"),
+  Cost = 1,
+  S1 = {X2,Y2}.
