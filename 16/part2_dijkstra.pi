@@ -1,40 +1,24 @@
+import planner_star.
+
 main =>
   G = read_file_lines(),
-  %G.map(println), nl,
   find_thing(G,'S',{Sx,Sy}),
   find_thing(G,'E',{Ex,Ey}),
+  get_heap_map(grid).put(1,G),
 
   Dists = new_map(),
   Rev_dists = {new_map(), new_map(), new_map(), new_map()},
 
   % find cheapest costs from start to all reachable nodes (location + orientation tuples)
-  dijkstra(G,{Sx,Sy,e},0,successors,Dists),
-  Best_cost = [Dists.get({Ex,Ey,D}) : D in [n,e,s,w], Dists.has_key({Ex,Ey,D})].min, % best cost to the end in any orientation
+  dijkstra({Sx,Sy,e},0,successor,_,Dists,_),
+  Best_cost = [Dists.get({Ex,Ey,D}) : D in [n,e,s,w], Dists.has_key({Ex,Ey,D})].min,
   println(dijkstra_best=Best_cost),
   % find cheapest costs from the end (in all 4 orientations) to every reachable node
-  _ = [_ : {D,I} in zip([n,e,s,w],1..4), dijkstra(G,{Ex,Ey,D},0,predecessors,Rev_dists[I])],
+  _ = [_ : {D,I} in zip([n,e,s,w],1..4), dijkstra({Ex,Ey,D},0,predecessor,_,Rev_dists[I],_)],
   % find all nodes on all shortest paths from start (facing east) to end (facing any orientation)
   Visited = [{X,Y} : {X,Y,D} in Dists.keys, Dists.get({X,Y,D}) = C, C <= Best_cost,
                      R in Rev_dists, R.has_key({X,Y,D}), R.get({X,Y,D}) + C = Best_cost].remove_dups,
   println(Visited.len).
-
-dijkstra(G,Start,Init_cost,Successor_fn,Dists) =>
-  Q = new_min_heap([{Init_cost,Start}]),
-  Dists.put(Start, 0),
-  Seen = new_set(),
-  Inf = maxint_small(),
-
-  while (Q.heap_size() > 0)
-    {Cost,S} = Q.heap_pop(),
-    if not(Seen.has_key(S)) then
-      Seen.put(S),
-      % successor function can be successors/2 (forward cost) or predecessors/2 (backward cost)
-      foreach ({S1,Move_cost} in apply(Successor_fn,S,G))
-        Dists.put(S1, min(Dists.get(S1,Inf), Cost+Move_cost)),
-        Q.heap_push({Cost+Move_cost,S1})
-      end,
-    end,
-  end.
 
 find_thing(G,C,S0) ?=>
   nth(Y,G,Row),
@@ -51,13 +35,16 @@ right(s) = w.
 right(w) = n.
 left(D) = D.right.right.right.
 
-successors({X,Y,D},G) = find_all({S1,Cost}, successor(X,Y,D,G,S1,Cost)).
-predecessors({X,Y,D},G) = [{{Px,Py,Pd.right.right},Cost} : {{Px,Py,Pd},Cost} in find_all({S1,Cost}, successor(X,Y,D.right.right,G,S1,Cost))].
+predecessor({X,Y,D},S1,Action,Cost) ?=>
+  successor({X,Y,D.right.right},S2,Action,Cost),
+  {Px,Py,Pd} = S2,
+  S1 = {Px,Py,Pd.right.right}.
 
-successor(Sx,Sy,D,G,S1,Cost) ?=>
+successor({Sx,Sy,D},S1,Action,Cost) ?=>
   (Action = f ; Action = l ; Action = r),
   {Lx,Ly,_} = move(Sx,Sy,D.left),
   {Rx,Ry,_} = move(Sx,Sy,D.right),
+  G = get_heap_map(grid).get(1),
   if G[Ly,Lx] == '#' && G[Ry,Rx] == '#' then
     Action == f
   end,
