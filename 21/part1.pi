@@ -1,0 +1,72 @@
+import planner_star.
+%import planner.
+
+main =>
+  Codes = read_file_lines(),
+  garbage_collect(4000000000),
+
+  S = 0,
+  foreach (Code in Codes)
+    best_plan_star({Code.to_lowercase,a,a,a},Plan,Cost),
+    %best_plan_unbounded({Code.to_lowercase,a,a,a},Plan,Cost),
+    N = [C : C in Code, digit(C)].to_int,
+    S := S + N*Cost,
+  end,
+  println(S).
+
+move_numpad(P,Dir,R) =>
+  Numpad = ["789","456","123","x0a"],
+  nth(Y,Numpad,Row),
+  nth(X,Row,P),
+  {X2,Y2} = move(X,Y,Dir),
+  nth(Y2,Numpad,Row2),
+  nth(X2,Row2,R).
+
+final({[],_,_,_}) => true.
+
+%table
+action({[C|Code],R1,R2,R3}, S1, Action, Cost) ?=>
+  member(Action,[u,d,l,r,a]),
+  move_dirpad(R3,Action,R3_b),
+  R2_b = R2,
+  R1_b = R1,
+  Code_b = [C|Code],
+  if Action == a then % I press A
+    % press R3's button
+    Action_r3 = R3_b,
+    move_dirpad(R2,Action_r3,A2),
+    R2_b := A2,
+    if Action_r3 == a then % R3 presses A
+      % press R2's button
+      move_numpad(R1,R2_b,A1),
+      R1_b := A1,
+      R1_b != 'x',
+      if R2_b == a then % R2 presses A
+        % press R1's button
+        R1_b = C,
+        Code_b := Code
+      end
+    end
+  end,
+
+  Cost = 1,
+  S1 = {Code_b,R1_b,R2_b,R3_b}.
+
+move(X,Y,u) = {X,Y-1}.
+move(X,Y,d) = {X,Y+1}.
+move(X,Y,l) = {X-1,Y}.
+move(X,Y,r) = {X+1,Y}.
+move(X,Y,a) = {X,Y}.
+
+move_dirpad(a,d,r).
+move_dirpad(a,l,u).
+move_dirpad(d,l,l).
+move_dirpad(d,r,r).
+move_dirpad(d,u,u).
+move_dirpad(l,r,d).
+move_dirpad(r,l,d).
+move_dirpad(r,u,a).
+move_dirpad(u,d,d).
+move_dirpad(u,r,a).
+move_dirpad(X,a,X).
+

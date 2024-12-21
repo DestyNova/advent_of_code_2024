@@ -1,0 +1,124 @@
+import planner.
+import util.
+
+main =>
+  Codes = read_file_lines(),
+  garbage_collect(4000000000),
+
+  S = 0,
+  Depth = 25,
+
+  foreach (Code in Codes)
+    println(checking=Code),
+    minof_inc(go(Code,Depth,Presses),Presses),
+    println(best_cost=Presses),
+    N = [C : C in Code, digit(C)].to_int,
+    S := S + N*Presses,
+  end,
+  println(S).
+
+go(Code,Depth,Presses) ?=>
+  % even with a cost function that prefers sequential runs of actions,
+  % best_plan will still generate plans that could force a longer action sequence
+  % at the next level, so we need to explore multiple plans and find the one that
+  % generates the least amount of presses. I'm not sure why this isn't more
+  % expensive but hey...
+  best_plan_nondet({num,Code.to_lowercase,a},Plan,Cost),
+  Presses = count_presses(Plan,Depth),
+  println({Code,Presses}).
+
+% break up an action sequence into chunks ending in an A button press (there's no
+% point pressing any buttons if A isn't pressed afterward). Chunking the actions
+% means there's more repetition, so tabling can be more effective.
+table
+chunk("",Acc,R) => R = Acc.reverse.
+chunk(S,Acc,R) =>
+  From = find_first_of(S,'a'),
+  chunk(S.drop(From),[S.take(From)|Acc],R).
+chunk(S,Acc,R) ?=> R = Acc.reverse.
+
+% break the action string into chunks, then recursively find the minimum number
+% of presses required to enter each chunk.
+table
+count_presses(S,0) = R =>
+  R = S.len.
+count_presses(S,N) = R =>
+  S.chunk([],Chunks),
+  C = 0,
+  foreach (Chunk in Chunks)
+    minof_inc(opt_presses(Chunk,N,T),T),
+    C := C + T,
+  end,
+  R = C.
+
+opt_presses(Chunk,N,T) ?=>
+  best_plan_nondet({key,Chunk,a},Plan,Cost),
+  T = count_presses(Plan,N-1).
+
+table
+move_numpad(P,Dir,R) =>
+  Pc = cond(list(P), P.head, P),
+  Numpad = ["789","456","123","x0a"],
+  nth(Y,Numpad,Row),
+  nth(X,Row,Pc),
+  Pc != x,
+  {X2,Y2} = move(X,Y,Dir),
+  nth(Y2,Numpad,Row2),
+  nth(X2,Row2,R).
+
+final({_,[],_}) => true.
+
+% plan numpad moves (pattern match on the num atom so we can use the planner
+% on two different problems, since there can only be one "action" predicate
+% in the program.
+action({num,[C|Code],R}, S1, Action, Cost) ?=>
+  % tabling won't work because we need to access current_plan/1
+  Curr = current_plan(),
+  Prev = cond(Curr.len > 0, Curr.head, none),
+  member(Action,[u,d,l,r,a]),
+  Code_b = [C|Code],
+  move_numpad(R,Action,A1),
+  R_b = A1,
+  if Action == a then
+    R_b := A1,
+    R_b = C,
+    Code_b := Code,
+  end,
+  % prefer sequential moves (e.g. uuurrr is much better than ururur)
+  Cost = cond((Prev == none || Prev == Action), 1000, 1001),
+  S1 = {num,Code_b,R_b}.
+
+% plan keypad moves
+action({key,[B|Buttons],R}, S1, Action, Cost) ?=>
+  member(Action,[u,d,l,r,a]),
+  Buttons_b = [B|Buttons],
+  Curr = current_plan(),
+  Prev = cond(Curr.len > 0, Curr.head, none),
+  move_dirpad(R,Action,A1),
+  R_b = A1,
+  if Action == a then
+    R_b := A1,
+    R_b == B,
+    Buttons_b := Buttons,
+  end,
+  Cost = cond((Prev == none || Prev == Action), 1000, 1001),
+  S1 = {key,Buttons_b,R_b}.
+
+move(X,Y,u) = {X,Y-1}.
+move(X,Y,d) = {X,Y+1}.
+move(X,Y,l) = {X-1,Y}.
+move(X,Y,r) = {X+1,Y}.
+move(X,Y,a) = {X,Y}.
+
+% this could probably be more elegant...
+move_dirpad(a,d,r).
+move_dirpad(a,l,u).
+move_dirpad(d,l,l).
+move_dirpad(d,r,r).
+move_dirpad(d,u,u).
+move_dirpad(l,r,d).
+move_dirpad(r,l,d).
+move_dirpad(r,u,a).
+move_dirpad(u,d,d).
+move_dirpad(u,r,a).
+move_dirpad(X,a,X).

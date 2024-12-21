@@ -1,12 +1,13 @@
 module planner_star.
 
 best_plan_star(S0,Plan,Cost) =>
+  % doesn't seem to find it
   Heuristic = cond(current_predicate(heuristic,1), heuristic, no_heuristic),
-  println(h=Heuristic),
   Dists = new_map(),
   dijkstra(S0,0,action,final,Heuristic,Final,Dists,Prevs),
   Plan = construct_plan(Final,Prevs,[]),
   Final != none,
+  get_heap_map(plan_star).put(final,Final),
   Cost = Dists.get(Final).
 
 construct_plan(S,Prevs) = construct_plan(S,Prevs,[]).reverse.

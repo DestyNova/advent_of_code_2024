@@ -1,0 +1,90 @@
+import planner.
+
+main =>
+  Codes = read_file_lines(),
+  println(Codes),
+
+  garbage_collect(4000000000),
+
+  S = 0,
+  foreach (Code in Codes)
+    println(checking=Code),
+    best_plan_bin({Code.to_lowercase,[a:_ in 1..25],a},Plan,Cost),
+    println(Cost),
+    N = [C : C in Code, digit(C)].to_int,
+    S := S + N*Cost,
+  end,
+  println(S).
+
+move_numpad(P,Dir,R) =>
+  Pc = cond(list(P), P.head, P),
+  Numpad = ["789","456","123","x0a"],
+  nth(Y,Numpad,Row),
+  nth(X,Row,Pc),
+  {X2,Y2} = move(X,Y,Dir),
+  nth(Y2,Numpad,Row2),
+  nth(X2,Row2,R).
+
+move(X,Y,u) = {X,Y-1}.
+move(X,Y,d) = {X,Y+1}.
+move(X,Y,l) = {X-1,Y}.
+move(X,Y,r) = {X+1,Y}.
+move(X,Y,a) = {X,Y}.
+
+move_dirpad(a,d,r).
+move_dirpad(a,l,u).
+move_dirpad(d,l,l).
+move_dirpad(d,r,r).
+move_dirpad(d,u,u).
+move_dirpad(l,r,d).
+move_dirpad(r,l,d).
+move_dirpad(r,u,a).
+move_dirpad(u,d,d).
+move_dirpad(u,r,a).
+move_dirpad(X,a,X).
+
+final({[],_,_}) => true.
+
+test() =>
+  S = "ldalaarruadaaluaraldlarruadaualdarualdlaruaraadaualdlararuaaadaluara",
+  S0 = {"029a",a,a,a},
+  foreach (X in S)
+    println([S0,X]),
+    action(S0,S1,[X].to_atom,Cost),
+    S0 := S1,
+  end.
+
+act(_,[],Acc) = Acc.reverse.
+act(Action,[R|Rs],Acc) = X =>
+  move_dirpad(R,Action,R_b),
+  if Action == a then
+    % press R3's button
+    Next_action = R_b,
+    X = act(Next_action,Rs,[R_b|Acc])
+  else
+    X = [R_b|Acc].reverse ++ Rs
+  end.
+
+%table
+action({[C|Code],Rs,R}, S1, Action, Cost) ?=>
+  member(Action,[u,d,l,r,a]),
+  Rs_b = act(Action,Rs,[]),
+  R_b = R,
+  Code_b = [C|Code],
+  if Action == a && Rs_b.reverse.tail.remove_dups == [a] then
+    Last_action = Rs_b.last,
+    move_numpad(R,Last_action,A1),
+    R_b := A1,
+    R_b != 'x',
+    if Last_action == a then % R2 presses A
+      % press R1's button
+      R_b = C,
+      Code_b := Code
+    end
+  end,
+
+  Cost = 1,
+  S1 = {Code_b,Rs_b,R_b}.
+
+% a ra1 a => _r1
+heuristic({Code,Rs,_}) = Code.len.

@@ -17,12 +17,12 @@ My solutions for the [Advent of Code 2024](https://adventofcode.com/2024/) progr
 ───────────────────────────────────────────────────────────────────────────────
 Language                     Files       Lines     Blanks    Comments      Code
 ───────────────────────────────────────────────────────────────────────────────
-Picat                           54        2620        363         106      2151
+Picat                           58        3012        411         141      2460
 Shell                            1          17          1           1        15
 ───────────────────────────────────────────────────────────────────────────────
-Total                           55        2637        364         107      2166
+Total                           59        3029        412         142      2475
 ───────────────────────────────────────────────────────────────────────────────
-Processed 85191 bytes, 0.085 megabytes (SI)
+Processed 94089 bytes, 0.094 megabytes (SI)
 ───────────────────────────────────────────────────────────────────────────────
 ```
 
@@ -48,7 +48,7 @@ Processed 85191 bytes, 0.085 megabytes (SI)
 * Day 18: [RAM Run](https://github.com/DestyNova/advent_of_code_2024/blob/main/18)
 * Day 19: [Linen Layout](https://github.com/DestyNova/advent_of_code_2024/blob/main/19)
 * Day 20: [Race Condition](https://github.com/DestyNova/advent_of_code_2024/blob/main/20)
-* Day 21: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/21)
+* Day 21: [Keypad Conundrum](https://github.com/DestyNova/advent_of_code_2024/blob/main/21)
 * Day 22: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/22)
 * Day 23: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/23)
 * Day 24: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/24)
