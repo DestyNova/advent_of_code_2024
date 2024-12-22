@@ -17,12 +17,13 @@ My solutions for the [Advent of Code 2024](https://adventofcode.com/2024/) progr
 ───────────────────────────────────────────────────────────────────────────────
 Language                     Files       Lines     Blanks    Comments      Code
 ───────────────────────────────────────────────────────────────────────────────
-Picat                           58        3012        411         141      2460
+Picat                           61        3247        427         150      2670
+Nim                              2          67         15           0        52
 Shell                            1          17          1           1        15
 ───────────────────────────────────────────────────────────────────────────────
-Total                           59        3029        412         142      2475
+Total                           64        3331        443         151      2737
 ───────────────────────────────────────────────────────────────────────────────
-Processed 94089 bytes, 0.094 megabytes (SI)
+Processed 102723 bytes, 0.103 megabytes (SI)
 ───────────────────────────────────────────────────────────────────────────────
 ```
 
@@ -49,7 +50,7 @@ Processed 94089 bytes, 0.094 megabytes (SI)
 * Day 19: [Linen Layout](https://github.com/DestyNova/advent_of_code_2024/blob/main/19)
 * Day 20: [Race Condition](https://github.com/DestyNova/advent_of_code_2024/blob/main/20)
 * Day 21: [Keypad Conundrum](https://github.com/DestyNova/advent_of_code_2024/blob/main/21)
-* Day 22: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/22)
+* Day 22: [Monkey Market](https://github.com/DestyNova/advent_of_code_2024/blob/main/22)
 * Day 23: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/23)
 * Day 24: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/24)
 * Day 25: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/25)

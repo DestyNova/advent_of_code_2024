@@ -1,0 +1,99 @@
+import sat.
+import util.
+
+main =>
+  D = read_file_lines().map(to_int),
+  D.go.println.
+
+go(Ns) = R =>
+  %println(go=N),
+  % 2001
+  Bs = Ns.len,
+  Pattern = new_array(4),
+  Pattern :: -9..9,
+  L = 2001,
+  Secrets = new_array(Bs,L),
+  Secrets :: 0..2**32,
+  Prices = new_array(Bs,L),
+  Prices :: 0..9,
+  Sold = new_array(Bs,L),
+  Sold :: 0..9,
+  Diffs = new_array(Bs,L),
+  Diffs :: -9..9,
+  Sales = new_list(Bs),
+  foreach (J in 1..Bs)
+    N = Ns[J],
+    Secrets[J,1] = N,
+    Prices[J,1] = N mod 10,
+    Diffs[J,1] = 0,
+    Sold[J,1] = 0,
+    foreach (I in 2..L)
+      new_secret(Secrets[J,I-1], S),
+      Secrets[J,I] #= S,
+      Prices[J,I] #= S mod 10,
+      Diffs[J,I] #= Prices[J,I] - Prices[J,I-1],
+      Sell :: 0..1,
+      if I < 5 then
+        Sell #= 0,
+      else
+        Sell #= cond((
+          Diffs[J,I-3] #= Pattern[1] #/\ 
+          Diffs[J,I-2] #= Pattern[2] #/\ 
+          Diffs[J,I-1] #= Pattern[3] #/\ 
+          Diffs[J,I] #= Pattern[4]),
+          1, 0),
+      end,
+      Sold[J,I] #= cond(Sold[J,I-1] #> 0, Sold[J,I-1], cond(Sell, Prices[J,I], 0)),
+    end,
+    Sales[J] #= max([Sale : Sale in Sold[J]]),
+    garbage_collect(500000000),
+    println(J),
+  end,
+  Total_sales #= sum([Sale : Sale in Sales]),
+  println(solving),
+  solve([$max(Total_sales),ff,split],[Prices,Sales,Pattern]),
+  R = Total_sales.
+
+new_secret(Secret,R) =>
+  K = 16777216,
+  S1 #= Secret*64,
+  mix(S1,Secret,S2),
+  D #= div(S2,32),
+  mix(D,S2,S3),
+  M #= S3*2048,
+  mix(M,S3,R).
+
+mix(A,B,Z) =>
+  to_bits(A,As),
+  to_bits(B,Bs),
+  Zs = new_array(32),
+  Zs :: 0..1,
+  println(as=As),
+  println(bs=Bs),
+  bxor_unsigned(As,Bs,Zs),
+  println(zs=Zs),
+  to_num_unsigned(Zs,Z0),
+  Z #= Z0 mod 16777216.
+
+bxor_unsigned(XA,YA,ZA) => 
+  foreach(I in 1..32)
+    ZA[I] #= XA[I] #!= YA[I]
+  end.
+
+to_num_unsigned(List, Num) =>
+   Len = List.len,
+   Num :: 0..2**32,
+   Num #= sum([List[I]*2**(Len-I) : I in 1..Len]).
+
+to_bits(N, List) =>
+  N #> 0,
+  List = new_list(32),
+  foreach (I in 1..8)
+    List[I] #= 0
+  end,
+  foreach (I in 9..32)
+    P = 2**(32-I),
+    Q :: 0..2**32,
+    Q #= div(N,P) mod 2,
+    List[I] #= Q mod 2
+  end.
