@@ -1,5 +1,5 @@
 # Day 22: [Monkey Market](https://adventofcode.com/2224/day/22)
-*Picat: [Part 1](https://github.com/DestyNova/advent_of_code_2224/blob/main/22/part1.pi) (00:52:46, rank 4380), [Part 2](https://github.com/DestyNova/advent_of_code_2224/blob/main/22/part2.pi) (04:26:41, rank 6185)*
+*Picat: [Part 1](https://github.com/DestyNova/advent_of_code_2224/blob/main/22/part1.pi) (00:52:46, rank 4380), Nim: [Part 2](https://github.com/DestyNova/advent_of_code_2224/blob/main/22/part2.pi) (04:26:41, rank 6185)*
 
 ### Part 1
 
