@@ -17,13 +17,13 @@ My solutions for the [Advent of Code 2024](https://adventofcode.com/2024/) progr
 ───────────────────────────────────────────────────────────────────────────────
 Language                     Files       Lines     Blanks    Comments      Code
 ───────────────────────────────────────────────────────────────────────────────
-Picat                           61        3247        427         150      2670
+Picat                           65        3413        445         151      2817
 Nim                              2          67         15           0        52
 Shell                            1          17          1           1        15
 ───────────────────────────────────────────────────────────────────────────────
-Total                           64        3331        443         151      2737
+Total                           68        3497        461         152      2884
 ───────────────────────────────────────────────────────────────────────────────
-Processed 102723 bytes, 0.103 megabytes (SI)
+Processed 106431 bytes, 0.106 megabytes (SI)
 ───────────────────────────────────────────────────────────────────────────────
 ```
 
@@ -51,6 +51,6 @@ Processed 102723 bytes, 0.103 megabytes (SI)
 * Day 20: [Race Condition](https://github.com/DestyNova/advent_of_code_2024/blob/main/20)
 * Day 21: [Keypad Conundrum](https://github.com/DestyNova/advent_of_code_2024/blob/main/21)
 * Day 22: [Monkey Market](https://github.com/DestyNova/advent_of_code_2024/blob/main/22)
-* Day 23: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/23)
+* Day 23: [LAN Party](https://github.com/DestyNova/advent_of_code_2024/blob/main/23)
 * Day 24: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/24)
 * Day 25: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/25)

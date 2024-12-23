@@ -1,5 +1,5 @@
-# Day 21: [Keypad Conundrum](https://adventofcode.com/2124/day/21)
-*Picat: [Part 1](https://github.com/DestyNova/advent_of_code_2124/blob/main/21/part1.pi) (01:18:58, rank 746), [Part 2](https://github.com/DestyNova/advent_of_code_2124/blob/main/21/part2.pi) (15:13:02, rank 6131)*
+# Day 21: [Keypad Conundrum](https://adventofcode.com/2024/day/21)
+*Picat: [Part 1](https://github.com/DestyNova/advent_of_code_2024/blob/main/21/part1.pi) (01:18:58, rank 746), [Part 2](https://github.com/DestyNova/advent_of_code_2024/blob/main/21/part2.pi) (15:13:02, rank 6131)*
 
 ### Part 1
 

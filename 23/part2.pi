@@ -1,0 +1,35 @@
+import sat.    % cp: 19.4s, sat: 12.4s
+import util.
+
+main => read_file_lines().process.go.
+
+go(D) =>
+  L = D.size,
+  Ns = D.keys.sort,
+  Clique = new_array(L),
+  Clique :: 0..1,
+
+  foreach (J in 1..L)
+    foreach (I in 1..L, I != J)
+      From = Ns[J],
+      To = Ns[I],
+      X = cond(D.get(From).has_key(To), 1, 0),
+      Clique[J] #/\ Clique[I] #=> X #= 1,
+    end,
+  end,
+  N :: 0..L, % Picat should infer this domain
+  exactly(N,Clique,0),
+  solve([ffd,split,$min(N)],[N,Clique]),
+  [Ns[Id] : {Id,1} in zip(1..L,Clique.to_list)].sort.println.
+
+process(Ls) = process(Ls,new_map()).
+process([],M) = M.
+process([L|Ls],M) = R =>
+  [X,Y] = L.split("-"),
+  Xs = M.get(X,new_set()),
+  Xs.put(Y),
+  Ys = M.get(Y,new_set()),
+  Ys.put(X),
+  M.put(X,Xs),
+  M.put(Y,Ys),
+  R = process(Ls,M).

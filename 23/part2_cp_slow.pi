@@ -1,0 +1,62 @@
+import sat.
+import util.
+
+main =>
+  D = read_file_lines().process,
+  D.println,
+  garbage_collect(2000000000),
+  go(D).
+
+go(D) =>
+  L = D.size,
+  Conns = new_array(L,L),
+  Ns = D.keys.sort,
+  println(Ns),
+  Mega_set = new_array(L),
+  Mega_set :: 0..L,
+  all_different_except_0(Mega_set),
+
+  foreach (J in 1..L)
+    foreach (I in 1..L, I != J)
+      From = Ns[J],
+      To = Ns[I],
+      Dests = D.get(From),
+      X = cond(Dests.has_key(To), 1, 0), % why can't we assign this directly with #=?
+      Conns[J,I] #= X
+    end,
+  end,
+
+  foreach (J in 1..L)
+    From = Mega_set[J],
+    From_s #= cond(From #= 0, 1, From),
+    println(from=From),
+    foreach (I in 1..L, I != J)
+      To = Mega_set[I],
+      To_s #= cond(To #= 0, 1, To),
+      T :: 0..1,
+      matrix_element(Conns,From_s,To_s,T),
+      (From #> 0 #/\ To #> 0 #/\ T #= 0) #=> (From #= 0) #\/ (To #= 0),
+    end,
+  end,
+  N :: 0..L, % bug: Picat should be able to infer this domain
+  count(0,Mega_set,N),
+  solve([split,$min(N)],[N,Mega_set]),
+  println(hey=N),
+  Size = L - N,
+  println(mega_set=Mega_set),
+  println(size=Size),
+  Ids = [Ns[Id] : Id in Mega_set, Id > 0].sort,
+  println(Ids).
+    
+
+process(Ls) = process(Ls,new_map()).
+process([],M) = M.
+process([L|Ls],M) = R =>
+  [X,Y] = L.split("-"),
+  Xs = M.get(X,new_set()),
+  Xs.put(Y),
+  Ys = M.get(Y,new_set()),
+  Ys.put(X),
+  M.put(X,Xs),
+  M.put(Y,Ys),
+  R = process(Ls,M).

@@ -1,0 +1,47 @@
+% infeasible; runs out of memory after 4 minutes
+import util.
+
+main =>
+  D = read_file_lines().process,
+  garbage_collect(2000000000),
+  maxof(find_all_conns(D,Set,S),S,$printf("New max: %w (%w)\n", S, Set)),
+  println(S),
+  println(Set.keys.sort).
+
+find_all_conns(D,Out,R) ?=>
+  member(X,D.keys),
+  G = new_set(),
+  G.put(X),
+  maxof(find_conns(D,G,Set,S),S,$printf("New inner max: %w (%w)\n", S, Set)),
+  Out = Set,
+  R = Set.size.
+
+table
+find_conns(D,Set,Out,R) ?=>
+  member(Y,Set.keys),
+  member(X,D.get(Y).keys),
+  not(Set.has_key(X)),
+  all_connected(X,Set,D),
+  Set.put(X),
+  maxof(find_conns(D,Set,Set2,Count),Count),
+  R = Count,
+  Out = Set2.
+find_conns(D,Set,Out,R) => R = Set.size, Out = Set.
+
+all_connected(X,Set,D) =>
+  Xs = D.get(X),
+  foreach (Y in Set.keys)
+    Xs.has_key(Y)
+  end.
+
+process(Ls) = process(Ls,new_map()).
+process([],M) = M.
+process([L|Ls],M) = R =>
+  [X,Y] = L.split("-"),
+  Xs = M.get(X,new_set()),
+  Xs.put(Y),
+  Ys = M.get(Y,new_set()),
+  Ys.put(X),
+  M.put(X,Xs),
+  M.put(Y,Ys),
+  R = process(Ls,M).

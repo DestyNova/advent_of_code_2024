@@ -1,0 +1,22 @@
+import util.
+
+main =>
+  D = read_file_lines().process,
+  S = find_all(Ns,find_historian(D,Ns)).remove_dups.len,
+  println(S).
+
+find_historian(D,Ns) ?=>
+  member(A,D.keys),
+  member(B,D.get(A)),
+  member(C,D.get(A)),
+  member(C,D.get(B)),
+  (A[1] == 't' ; B[1] == 't' ; C[1] == 't'),
+  Ns = [A,B,C].sort.
+
+process(Ls) = process(Ls,new_map()).
+process([],M) = M.
+process([L|Ls],M) = R =>
+  [X,Y] = L.split("-"),
+  M.put(X,[Y|M.get(X,[])]),
+  M.put(Y,[X|M.get(Y,[])]),
+  R = process(Ls,M).
