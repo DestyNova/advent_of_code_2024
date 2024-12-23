@@ -1,4 +1,4 @@
-import sat.    % cp: 19.4s, sat: 12.4s
+import cp.    % cp: 11.5s, sat: 12.4s, maxsat (CASHWMaxSAT-CorePlus): 5.8s
 import util.
 
 main => read_file_lines().process.go.
@@ -19,7 +19,7 @@ go(D) =>
   end,
   N :: 0..L, % Picat should infer this domain
   exactly(N,Clique,0),
-  solve([ffd,split,$min(N)],[N,Clique]),
+  solve([ffd,updown,$min(N)],[N,Clique]),
   [Ns[Id] : {Id,1} in zip(1..L,Clique.to_list)].sort.println.
 
 process(Ls) = process(Ls,new_map()).

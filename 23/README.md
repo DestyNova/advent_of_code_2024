@@ -35,4 +35,5 @@ Benchmark 1: picat part1.pi < input
 ### Part 2
 
 * SAT: 12.4s
-* CP: 19.4s
+* CP: ~~19.4s~~ 11.5s with `ffd,updown`
+* MaxSAT (CASHWMaxSAT-CorePlus): 5.8s
