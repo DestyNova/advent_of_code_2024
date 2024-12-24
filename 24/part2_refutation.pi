@@ -24,34 +24,34 @@ go({Inits,Gate_list}) =>
   end,
   %println(gs=Gs),
 
-  % indirection table for outputs
   N = Gs.size,
-  Index = new_array(N),
-  Index :: 1..N,
+
+  Gate_count = Gate_list.len,
+
+  % Outputs maps from gate index to output register
+  Outputs = new_array(Gate_list.len),
+  % indirection table for outputs
+  Index = new_array(Gate_count),
+  Index :: 1..Gate_count,
   all_different(Index),
-
-  % no input registers should be swapped
-  foreach (Reg in Gs.keys)
-    if membchk(Reg[1], "xy") then
-      Index[Gs.get(Reg)] #= Gs.get(Reg)
-    end
-  end,
-
-  % swaps: Index[I] #!= I implies a gate has been swapped
-  Swapped = new_array(N),
-  foreach (I in 1..N)
+  % swaps: Index[I] #!= I implies a register has been swapped with another gate
+  Swapped = new_array(Gate_count),
+  foreach (I in 1..Gate_count)
+    [G1,Op,G2,Reg] = Gate_list[I],
+    Outputs[I] #= Regs[Gs.get(Reg)],
     J #= Index[I],
-    Swapped[I] #= cond(J #= I, 0, 1),
+    Swapped[I] #<=> J #!= I,
   end,
-  sum(Swapped) #= 8,
+  exactly(8,Swapped,1),
 
   % now encode the instructions
-  foreach([G1,Op,G2,Res] in Gate_list)
+  foreach(I in 1..Gate_count)
+    [G1,Op,G2,_] = Gate_list[I],
     X1 = Regs[Gs.get(G1)],
     X2 = Regs[Gs.get(G2)],
-    Out_orig = Gs.get(Res),
-    Out_i = Index[Out_orig],
-    element(Out_i,Regs,Out),
+
+    Out_i #= Index[I],
+    element(Out_i,Outputs,Out),
     op(X1,Op,X2,Out),
     %if Res.first == 'z' then
     %  Zs := Zs ++ [Res]
@@ -60,10 +60,10 @@ go({Inits,Gate_list}) =>
   % count counterexample...
   Bits = 45, % yeah, hardcode for now
   Xs = new_array(Bits), Ys = new_array(Bits), Zs = new_array(Bits + 1),
-  assign_number(Xs,"x",Index,Regs,Gs,X),
+  assign_number(Xs,"x",Regs,Gs,X),
   %Xs[1] #= 1,
-  assign_number(Ys,"y",Index,Regs,Gs,Y),
-  assign_number(Zs,"z",Index,Regs,Gs,Z),
+  assign_number(Ys,"y",Regs,Gs,Y),
+  assign_number(Zs,"z",Regs,Gs,Z),
   println(c=[X,Y,Z]),
   Counterexample = new_array(1),
   Counterexample :: 0..1,
@@ -72,14 +72,19 @@ go({Inits,Gate_list}) =>
   % the z?? outputs don't equal X+Y. If we *can't* find such a counterexample,
   % then the set of swaps in the Index array, when applied, restores the
   % functioning of the adder network, and gives us our puzzle solution.
-  X #= 2**44 - 1, % why can't they both be 2**45-1?
-  Y #= 2**45 - 1,
+  %X #= 2**44 - 1234, % why can't they both be 2**45-1?
+  %Y #= 2**45 - 1234,
+
+  % X = 01010101010101010101010101010101010101010101 (5864062014805)
+  % Y = 10101010101010101010101010101010101010101010
+  X #= 5864062014805, % why can't they both be 2**45-1?
+  Y #= 11728124029610,
   (X+Y #!= Z) #<=> Counterexample[1] #= 1,
   Fails #= sum(Counterexample),
-  %Fails #= 0, % this just prevents it from finding counterexamples...
+  Fails #= 0, % this just prevents it from finding counterexamples...
   garbage_collect(1000000000),
   println(solving),
-  solve([$max(Fails)],[Xs,Ys,Zs,X,Y,Z,Counterexample,Index]),
+  solve([maxsat,$max(Fails)],[Xs,Ys,Zs,X,Y,Z,Counterexample,Index]),
   println([Xs,Ys,Zs,X,Y,Z,Counterexample]),
   println(indices=Index),
   Reverse_gs = new_map(),
@@ -99,11 +104,11 @@ go({Inits,Gate_list}) =>
   nl.
   %println([Gs.get(Z) : Z in Zs.sort.reverse].bin_to_dec()).
 
-assign_number(Ds,C,Index,Regs,Gs,V) =>
+assign_number(Ds,C,Regs,Gs,V) =>
   println([C,Ds.len]),
   foreach (I in 1..Ds.len)
-    Out_orig = Gs.get(to_fstring("%w%02d",C,I-1)),
-    element(Index[Out_orig],Regs,K),
+    Reg = Gs.get(to_fstring("%w%02d",C,I-1)),
+    Regs[Reg] #= K,
     Ds[I] #= K
   end,
   to_num_unsigned(Ds,V).
