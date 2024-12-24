@@ -13,7 +13,7 @@ go({Inits,Gate_list}) =>
   % build a list of variables for all registers + map of register name to its index
   %println(gates=Gate_list),
   foreach([G1,_,G2,Res] in Gate_list)
-    println(group=[G1,G2,Res]),
+    %println(group=[G1,G2,Res]),
     foreach (Reg in [G1,G2,Res])
       if not Gs.has_key(Reg) then
         X :: 0..1,
@@ -29,8 +29,9 @@ go({Inits,Gate_list}) =>
   Gate_count = Gate_list.len,
 
   % Outputs maps from gate index to output register
-  Outputs = new_array(Gate_list.len),
-  % indirection table for outputs
+  Outputs = new_array(Gate_count),
+  Outputs :: 0..1,
+  % indirection table for output registers
   Index = new_array(Gate_count),
   Index :: 1..Gate_count,
   all_different(Index),
@@ -38,19 +39,26 @@ go({Inits,Gate_list}) =>
   Swapped = new_array(Gate_count),
   foreach (I in 1..Gate_count)
     [G1,Op,G2,Reg] = Gate_list[I],
-    Outputs[I] #= Regs[Gs.get(Reg)],
-    J #= Index[I],
-    Swapped[I] #<=> J #!= I,
+    V #= Regs[Gs.get(Reg)],
+    Outputs[I] #= V,
+    element(I,Index,I2),
+    element(I2,Index,I),
+    I #!= I2 #=> Swapped[I] #= 1,
+    I #= I2 #=> Swapped[I] #= 0,
   end,
   exactly(8,Swapped,1),
 
   % now encode the instructions
   foreach(I in 1..Gate_count)
-    [G1,Op,G2,_] = Gate_list[I],
+    [G1,Op,G2,Out_name] = Gate_list[I],
     X1 = Regs[Gs.get(G1)],
     X2 = Regs[Gs.get(G2)],
+    Reg = Regs[Gs.get(Out_name)],
 
     Out_i #= Index[I],
+    % why does this help? we already did it...
+    Swapped[I] #= 1 #=> Out_i #!= I,
+    Swapped[I] #= 0 #=> Out_i #= I,
     element(Out_i,Outputs,Out),
     op(X1,Op,X2,Out),
     %if Res.first == 'z' then
@@ -61,7 +69,6 @@ go({Inits,Gate_list}) =>
   Bits = 45, % yeah, hardcode for now
   Xs = new_array(Bits), Ys = new_array(Bits), Zs = new_array(Bits + 1),
   assign_number(Xs,"x",Regs,Gs,X),
-  %Xs[1] #= 1,
   assign_number(Ys,"y",Regs,Gs,Y),
   assign_number(Zs,"z",Regs,Gs,Z),
   println(c=[X,Y,Z]),
@@ -77,27 +84,33 @@ go({Inits,Gate_list}) =>
 
   % X = 01010101010101010101010101010101010101010101 (5864062014805)
   % Y = 10101010101010101010101010101010101010101010
-  X #= 5864062014805, % why can't they both be 2**45-1?
-  Y #= 11728124029610,
+  % X #= 5864062014805, % why can't they both be 2**45-1?
+  % Y #= 11728124029610,
+  X #= 1234, % works for tiny numbers only... maybe the swaps aren't working?
+  Y #= 4567,
   (X+Y #!= Z) #<=> Counterexample[1] #= 1,
   Fails #= sum(Counterexample),
   Fails #= 0, % this just prevents it from finding counterexamples...
   garbage_collect(1000000000),
   println(solving),
-  solve([maxsat,$max(Fails)],[Xs,Ys,Zs,X,Y,Z,Counterexample,Index]),
-  println([Xs,Ys,Zs,X,Y,Z,Counterexample]),
-  println(indices=Index),
+  %solve([],[Z]),
+  solve([maxsat,$max(Fails)],[Xs,Ys,Zs,X,Y,Z,Fails,Counterexample,Index,Swapped]),
+  println(swapped=Swapped),
+  println([X,Y,Z]),
   Reverse_gs = new_map(),
   foreach (K=V in Gs)
     Reverse_gs.put(V,K)
   end,
   %println(rev=Reverse_gs),
+  println(index=Index),
   Swaps = [],
-  foreach (I in 1..N)
+  foreach (I in 1..Gate_count)
     if Index[I] != I then
       println(swapped=[I,Index[I]]),
-      Swaps := [Reverse_gs.get(I)|Swaps],
-      Swaps := [Reverse_gs.get(Index[I])|Swaps],
+      Out1 = Gate_list[I].last,
+      Out2 = Gate_list[Index[I]].last,
+      Swaps := [Out1|Swaps],
+      Swaps := [Out2|Swaps],
     end,
   end,
   println(swaps=Swaps.remove_dups.sort),
