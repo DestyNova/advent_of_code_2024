@@ -1,0 +1,124 @@
+% Part 2 program mostly liberated from Hakan Kjellerstrand
+
+import sat.
+import regex.
+import util.
+
+main => read_file_chars().parse.go.
+
+go({Inits,Gate_list}) => 
+  Gs = new_map(),
+  Regs = [],
+
+  % build a list of variables for all registers + map of register name to its index
+  %println(gates=Gate_list),
+  foreach([G1,_,G2,Res] in Gate_list)
+    println(group=[G1,G2,Res]),
+    foreach (Reg in [G1,G2,Res])
+      if not Gs.has_key(Reg) then
+        X :: 0..1,
+        Regs := [X|Regs],
+        Gs.put(Reg,Regs.len),
+      end,
+    end,
+  end,
+  %println(gs=Gs),
+
+  % indirection table for outputs
+  N = Gs.size,
+  Index = new_array(N),
+  Index :: 1..N,
+  all_different(Index),
+
+  % no input registers should be swapped
+  foreach (Reg in Gs.keys)
+    if membchk(Reg[1], "xy") then
+      Index[Gs.get(Reg)] #= Gs.get(Reg)
+    end
+  end,
+
+  % swaps: Index[I] #!= I implies a gate has been swapped
+  Swapped = new_array(N),
+  foreach (I in 1..N)
+    J #= Index[I],
+    Swapped[I] #= cond(J #= I, 0, 1),
+  end,
+  sum(Swapped) #= 8,
+
+  % now encode the instructions
+  foreach([G1,Op,G2,Res] in Gate_list)
+    X1 = Regs[Gs.get(G1)],
+    X2 = Regs[Gs.get(G2)],
+    Out_orig = Gs.get(Res),
+    Out_i = Index[Out_orig],
+    element(Out_i,Regs,Out),
+    op(X1,Op,X2,Out),
+    %if Res.first == 'z' then
+    %  Zs := Zs ++ [Res]
+    %end
+  end,
+  % count counterexample...
+  Bits = 45, % yeah, hardcode for now
+  Xs = new_array(Bits), Ys = new_array(Bits), Zs = new_array(Bits + 1),
+  assign_number(Xs,"x",Index,Regs,Gs,X),
+  %Xs[1] #= 1,
+  assign_number(Ys,"y",Index,Regs,Gs,Y),
+  assign_number(Zs,"z",Index,Regs,Gs,Z),
+  println(c=[X,Y,Z]),
+  Counterexample = new_array(1),
+  Counterexample :: 0..1,
+  X #= 2**44 - 1, % why can't they both be 2**45-1?
+  Y #= 2**45 - 1,
+  (X+Y #!= Z) #<=> Counterexample[1] #= 1,
+  Fails #= sum(Counterexample),
+  Fails #= 0, % this just prevents it from finding counterexamples...
+  garbage_collect(1000000000),
+  println(solving),
+  solve([$max(Fails)],[Xs,Ys,Zs,X,Y,Z,Counterexample,Index]),
+  println([Xs,Ys,Zs,X,Y,Z,Counterexample]),
+  println(indices=Index),
+  Reverse_gs = new_map(),
+  foreach (K=V in Gs)
+    Reverse_gs.put(V,K)
+  end,
+  %println(rev=Reverse_gs),
+  Swaps = [],
+  foreach (I in 1..N)
+    if Index[I] != I then
+      println(swapped=[I,Index[I]]),
+      Swaps := [Reverse_gs.get(I)|Swaps],
+      Swaps := [Reverse_gs.get(Index[I])|Swaps],
+    end,
+  end,
+  println(swaps=Swaps.remove_dups.sort),
+  nl.
+  %println([Gs.get(Z) : Z in Zs.sort.reverse].bin_to_dec()).
+
+assign_number(Ds,C,Index,Regs,Gs,V) =>
+  println([C,Ds.len]),
+  foreach (I in 1..Ds.len)
+    Out_orig = Gs.get(to_fstring("%w%02d",C,I-1)),
+    element(Index[Out_orig],Regs,K),
+    Ds[I] #= K
+  end,
+  to_num_unsigned(Ds,V).
+
+op(X,"AND",Y,Z) :-
+  Z #= cond(X #= 1 #/\ Y #= 1, 1, 0).
+
+op(X,"OR",Y,Z) :-
+  Z #= cond(X #= 1 #\/ Y #= 1, 1, 0).  
+
+op(X,"XOR",Y,Z) :-
+  Z #= cond(X #!= Y #= 1, 1, 0).    
+
+bin_to_dec(L) = [2**(L.len-I)*L[I] : I in 1..L.len].sum.
+to_num_unsigned(List, Num) =>
+   Len = List.len,
+   Num :: 0..2**47,
+   Num #= sum([List[I]*2**(Len-I) : I in 1..Len]).
+
+parse(S) = R =>
+  Init = regex_find_all("(.+): (\\d)", S),
+  Gates = regex_find_all("(.+) (AND|OR|XOR) (.+) -\\> (\\w+)", S),
+  R = {Init,Gates}.
