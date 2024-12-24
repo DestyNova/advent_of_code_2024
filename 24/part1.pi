@@ -1,0 +1,32 @@
+import regex.
+
+main =>
+  {Init,Gates} = read_file_chars().go,
+  Wires = new_map(),
+  foreach ([Wire,X] in Init)
+    Wires.put(Wire,X.to_int)
+  end,
+
+  while (Gates.size > 0)
+    foreach (Gate in Gates.keys)
+      [A,Op,B,Dest] = Gate,
+      if Wires.has_key(A) && Wires.has_key(B) then
+        Wires.put(Dest,op(Op,A,B,Wires)),
+        Gates.del(Gate),
+      end
+    end
+  end,
+  Outs = [{K.tail.to_int,V} : K=V in Wires, K[1]='z'].sort.reverse.map(last),
+  X = fold(from_bin,0,Outs),
+  println(X).
+
+from_bin(X,Acc) = Acc*2 + X.
+
+op("AND",A,B,W) = W.get(A) * W.get(B).
+op("OR",A,B,W) = max(W.get(A),W.get(B)).
+op("XOR",A,B,W) = (W.get(A) - W.get(B))**2.
+
+go(S) = R =>
+  Init = regex_find_all("(.+): (\\d)", S),
+  Gates = regex_find_all("(.+) (AND|OR|XOR) (.+) -\\> (\\w+)", S),
+  R = {Init,Gates.new_set}.

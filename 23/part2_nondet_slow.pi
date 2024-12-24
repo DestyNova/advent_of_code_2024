@@ -12,21 +12,19 @@ find_all_conns(D,Out,R) ?=>
   member(X,D.keys),
   G = new_set(),
   G.put(X),
-  maxof(find_conns(D,G,Set,S),S,$printf("New inner max: %w (%w)\n", S, Set)),
+  find_conns(X,D,G,Set,S),
   Out = Set,
   R = Set.size.
 
-table
-find_conns(D,Set,Out,R) ?=>
-  member(Y,Set.keys),
+find_conns(Y,D,Set,Out,R) ?=>
   member(X,D.get(Y).keys),
   not(Set.has_key(X)),
   all_connected(X,Set,D),
   Set.put(X),
-  maxof(find_conns(D,Set,Set2,Count),Count),
+  find_conns(Y,D,Set,Set2,Count),
   R = Count,
   Out = Set2.
-find_conns(D,Set,Out,R) => R = Set.size, Out = Set.
+find_conns(Y,D,Set,Out,R) => R = Set.size, Out = Set.
 
 all_connected(X,Set,D) =>
   Xs = D.get(X),
