@@ -22,6 +22,15 @@ This worked on the sample input but was definitely not going to finish on the fu
 
 ...which just says, if two nodes are in the clique, they must be connected. Then we solve with a minimisation constraint on the number of zeroes in the clique. Amazingly this is enough for Picat's SAT solver to produce the correct result in 12.5 seconds. Not blazingly fast, but easy to read, and I didn't have to look up any proper clique finding algorithms (although I will, later...).
 
+**Update:** Neng-Fa Zhou pointed out that making the following change to get the size of the clique boosts the speed by about 40% for CP/SAT and maxsat:
+
+```diff
+-  exactly(N,Clique,0),
++  sum(Clique) #= L-N,
+```
+
+Strangely, swapping `L-N` for a `Size` variable which we then try to maximise slows the program down significantly.
+
 ## Timings
 
 ### Part 1
@@ -34,6 +43,6 @@ Benchmark 1: picat part1.pi < input
 
 ### Part 2
 
-* SAT: 12.4s
-* CP: ~~19.4s~~ 11.5s with `ffd,updown`
-* MaxSAT (CASHWMaxSAT-CorePlus): 5.8s
+* SAT: ~~12.4s~~ 8.1s
+* CP: ~~19.4s~~ ~~11.5s~~ 8.4s with `ffd,updown`
+* MaxSAT (CASHWMaxSAT-CorePlus): ~~5.8s~~ 5.1s
