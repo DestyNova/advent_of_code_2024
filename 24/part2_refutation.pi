@@ -67,11 +67,16 @@ go({Inits,Gate_list}) =>
   println(c=[X,Y,Z]),
   Counterexample = new_array(1),
   Counterexample :: 0..1,
+  % I'm manually selecting values of X and Y here, but really what I want is
+  % for Picat to *try* to find values of the x?? and y?? inputs such that
+  % the z?? outputs don't equal X+Y. If we *can't* find such a counterexample,
+  % then the set of swaps in the Index array, when applied, restores the
+  % functioning of the adder network, and gives us our puzzle solution.
   X #= 2**44 - 1, % why can't they both be 2**45-1?
   Y #= 2**45 - 1,
   (X+Y #!= Z) #<=> Counterexample[1] #= 1,
   Fails #= sum(Counterexample),
-  Fails #= 0, % this just prevents it from finding counterexamples...
+  %Fails #= 0, % this just prevents it from finding counterexamples...
   garbage_collect(1000000000),
   println(solving),
   solve([$max(Fails)],[Xs,Ys,Zs,X,Y,Z,Counterexample,Index]),
