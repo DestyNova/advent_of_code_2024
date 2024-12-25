@@ -1,6 +1,6 @@
 % Part 2 program mostly liberated from Hakan Kjellerstrand
 
-import sat.
+import cp.
 import regex.
 import util.
 
@@ -23,9 +23,9 @@ go({Inits,Gate_list}) =>
     end,
   end,
   %println(gs=Gs),
+  Regs := Regs.reverse, % I forgot about this... we put elements in Regs backwards...
 
   N = Gs.size,
-
   Gate_count = Gate_list.len,
 
   % Outputs maps from gate index to output register
@@ -38,29 +38,27 @@ go({Inits,Gate_list}) =>
   % swaps: Index[I] #!= I implies a register has been swapped with another gate
   Swapped = new_array(Gate_count),
   foreach (I in 1..Gate_count)
-    [G1,Op,G2,Reg] = Gate_list[I],
-    V #= Regs[Gs.get(Reg)],
-    Outputs[I] #= V,
+    [_,_,_,Reg_name] = Gate_list[I],
+    Reg #= Regs[Gs.get(Reg_name)],
     element(I,Index,I2),
     element(I2,Index,I),
-    I #!= I2 #=> Swapped[I] #= 1,
-    I #= I2 #=> Swapped[I] #= 0,
+    I #!= I2 #<=> Swapped[I] #= 1,
+    I #= I2 #<=> Swapped[I] #= 0,
+    element(I2,Outputs,Reg), % pre-swap the outputs
   end,
   exactly(8,Swapped,1),
+  %println(out=[Outputs.len,Outputs.remove_dups.len]),
 
   % now encode the instructions
   foreach(I in 1..Gate_count)
-    [G1,Op,G2,Out_name] = Gate_list[I],
-    X1 = Regs[Gs.get(G1)],
-    X2 = Regs[Gs.get(G2)],
-    Reg = Regs[Gs.get(Out_name)],
-
-    Out_i #= Index[I],
+    [X,Op,Y,_] = Gate_list[I],
+    Xv = Regs[Gs.get(X)],
+    Yv = Regs[Gs.get(Y)],
     % why does this help? we already did it...
-    Swapped[I] #= 1 #=> Out_i #!= I,
-    Swapped[I] #= 0 #=> Out_i #= I,
-    element(Out_i,Outputs,Out),
-    op(X1,Op,X2,Out),
+    %Swapped[I] #= 1 #=> Out_i #!= I,
+    %Swapped[I] #= 0 #=> Out_i #= I,
+    op(Xv,Op,Yv,Out),
+    element(I,Outputs,Out),
     %if Res.first == 'z' then
     %  Zs := Zs ++ [Res]
     %end
@@ -86,15 +84,16 @@ go({Inits,Gate_list}) =>
   % Y = 10101010101010101010101010101010101010101010
   % X #= 5864062014805, % why can't they both be 2**45-1?
   % Y #= 11728124029610,
-  X #= 1234, % works for tiny numbers only... maybe the swaps aren't working?
-  Y #= 4567,
+  X #= 35508, % works for tiny numbers only... maybe the swaps aren't working?
+  Y #= 37119,
   (X+Y #!= Z) #<=> Counterexample[1] #= 1,
   Fails #= sum(Counterexample),
   Fails #= 0, % this just prevents it from finding counterexamples...
   garbage_collect(1000000000),
   println(solving),
   %solve([],[Z]),
-  solve([maxsat,$max(Fails)],[Xs,Ys,Zs,X,Y,Z,Fails,Counterexample,Index,Swapped]),
+  solve([],[Xs,Ys,Zs,X,Y,Z,Fails,Counterexample,Index,Swapped]),
+  %solve([maxsat,$max(Fails)],[Xs,Ys,Zs,X,Y,Z,Fails,Counterexample,Index,Swapped]),
   println(swapped=Swapped),
   println([X,Y,Z]),
   Reverse_gs = new_map(),
@@ -107,6 +106,8 @@ go({Inits,Gate_list}) =>
   foreach (I in 1..Gate_count)
     if Index[I] != I then
       println(swapped=[I,Index[I]]),
+      println(Gate_list[I]),
+      println(Gate_list[Index[I]]),
       Out1 = Gate_list[I].last,
       Out2 = Gate_list[Index[I]].last,
       Swaps := [Out1|Swaps],
@@ -126,13 +127,13 @@ assign_number(Ds,C,Regs,Gs,V) =>
   end,
   to_num_unsigned(Ds,V).
 
-op(X,"AND",Y,Z) :-
+op(X,"AND",Y,Z) =>
   Z #= cond(X #= 1 #/\ Y #= 1, 1, 0).
 
-op(X,"OR",Y,Z) :-
+op(X,"OR",Y,Z) =>
   Z #= cond(X #= 1 #\/ Y #= 1, 1, 0).  
 
-op(X,"XOR",Y,Z) :-
+op(X,"XOR",Y,Z) =>
   Z #= cond(X #!= Y #= 1, 1, 0).    
 
 bin_to_dec(L) = [2**(L.len-I)*L[I] : I in 1..L.len].sum.

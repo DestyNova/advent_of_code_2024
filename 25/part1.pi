@@ -1,0 +1,25 @@
+import util.
+
+main =>
+  D = read_file_lines().parse,
+  D.println,
+
+  S = 0,
+  foreach (J in 1..D.len-1)
+    {L,H1} = D[J],
+    foreach (I in (J+1)..D.len)
+      {K,H2} = D[I],
+      if L != K && max([X+Y : {X,Y} in zip(H1,H2)]) < 6 then
+        S := S + 1
+      end
+    end
+  end,
+  println(S).
+
+parse(D) = parse(D,[]).
+parse([],Acc) = Acc.
+parse(Ls,Acc) = parse(Ls.drop(8),[Ls.take(7).to_spec|Acc]).
+
+to_spec(G) = R =>
+  {T,Type} = cond(G[1,1] == '#', {G.tail.transpose,lock}, {G.reverse.tail.transpose,key}),
+  R = {Type, [Column.delete_all('.').len : Column in T]}.

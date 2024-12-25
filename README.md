@@ -17,13 +17,13 @@ My solutions for the [Advent of Code 2024](https://adventofcode.com/2024/) progr
 ───────────────────────────────────────────────────────────────────────────────
 Language                     Files       Lines     Blanks    Comments      Code
 ───────────────────────────────────────────────────────────────────────────────
-Picat                           67        3523        459         155      2909
+Picat                           69        3698        477         188      3033
 Nim                              2          67         15           0        52
 Shell                            1          17          1           1        15
 ───────────────────────────────────────────────────────────────────────────────
-Total                           70        3607        475         156      2976
+Total                           72        3782        493         189      3100
 ───────────────────────────────────────────────────────────────────────────────
-Processed 109214 bytes, 0.109 megabytes (SI)
+Processed 114407 bytes, 0.114 megabytes (SI)
 ───────────────────────────────────────────────────────────────────────────────
 ```
 
@@ -53,4 +53,4 @@ Processed 109214 bytes, 0.109 megabytes (SI)
 * Day 22: [Monkey Market](https://github.com/DestyNova/advent_of_code_2024/blob/main/22)
 * Day 23: [LAN Party](https://github.com/DestyNova/advent_of_code_2024/blob/main/23)
 * Day 24: [Crossed Wires](https://github.com/DestyNova/advent_of_code_2024/blob/main/24)
-* Day 25: [?](https://github.com/DestyNova/advent_of_code_2024/blob/main/25)
+* Day 25: [Code Chronicle](https://github.com/DestyNova/advent_of_code_2024/blob/main/25)
