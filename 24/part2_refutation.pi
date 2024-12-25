@@ -1,5 +1,18 @@
 % Part 2 program mostly liberated from Hakan Kjellerstrand
 
+% The plan here was for Picat to *try* to find values of the x?? and y??
+% inputs such that the z?? outputs don't equal X+Y. If we *can't* find
+% such a counterexample, then the set of swaps in the Index array, when
+% applied, restores the functioning of the adder network, and gives us our
+% puzzle solution.
+% Sadly I couldn't find a meaningful way to express that. Proof systems like Liquid
+% Haskell, as I understand it, prove statements by testing that the negation of
+% the statement is unsatisfiable -- i.e. there is no possible counterexample.
+% I couldn't figure out how to express this in Picat while *also* searching for the
+% swapped outputs. Instead, the program currently finds individual values of X/Y/Z
+% with some swaps that allow the equality X+Y #= Z to hold for those values,
+% which says nothing about the generality of the addition.
+
 import sat.
 import regex.
 import util.
@@ -45,12 +58,15 @@ go({Inits,Gate_list}) =>
     [X,Op,Y,Reg_name] = Gate_list[I],
     Xv = Regs[Gs.get(X)],
     Yv = Regs[Gs.get(Y)],
-    Reg #= Regs[Gs.get(Reg_name)],
+    K = Gs.get(Reg_name),
+    element(K,Regs,Reg),
+    %Reg = Regs[K],
 
     element(I,Index,I2), % I2 is the gate index whose register should be written to
     element(I2,Index,I), % either this gate, or another gate that should write to this reg
     if false && membchk(Reg_name, ["kth","z12","gsd","z26","tbt","z32","vpm","qnf"]) then
       % this makes it unsolvable... am I putting input in backwards or something? something is off.
+      println(force_swapping=Gate_list[I]),
       I #!= I2
     end,
     S :: 0..1,
@@ -59,9 +75,10 @@ go({Inits,Gate_list}) =>
     element(I,Swapped,S),
     element(I2,Swapped,S),
 
+    % why does this fail?
     element(I2,Outputs,Reg), % swap destination register to another gate output
     element(I,Outputs,Dest), % true output of this gate (may be a different register)
-    S #= 1 #=> Reg #= Dest,  % this doesn't help
+    S #= 0 #=> Reg #= Dest,  % this doesn't help
     op(Xv,Op,Yv,Dest),
   end,
   exactly(8,Swapped,1),
@@ -74,43 +91,36 @@ go({Inits,Gate_list}) =>
   assign_number(Xs,x,Regs,Gs,X),
   assign_number(Ys,y,Regs,Gs,Y),
   assign_number(Zs,z,Regs,Gs,Z),
-  X1 = random2() mod 2**9,
-  Y1 = random2() mod 2**9,
-  %X #= X1, Y #= Y1,
-  X #= 1,
-  Y #= 4096, % fails at 1 + 4095
-  Z #= X+Y #=> Fails #= 0,
-  Z #!= X+Y #=> Fails #= 1,
-  % I'm manually selecting values of X and Y here, but really what I want is
-  % for Picat to *try* to find values of the x?? and y?? inputs such that
-  % the z?? outputs don't equal X+Y. If we *can't* find such a counterexample,
-  % then the set of swaps in the Index array, when applied, restores the
-  % functioning of the adder network, and gives us our puzzle solution.
-  %X #= 2**44 - 1234, % why can't they both be 2**45-1?
-  %Y #= 2**45 - 1234,
-
+  X #> 0, Y #> 0,
+  %X1 = random2() mod 2**45,
+  %Y1 = random2() mod 2**45,
+  % X #= X1, Y #= Y1,
+  %X #= 2**45-1, Y #= 2**45-1,
+  %X #= 35184372088831,
+  %Y #= 33939827265535, % fails at 1 + 4095
+  %println([X,Y,X+Y]),
+  %Z #= X+Y,
+  %Z #= X+Y #=> Fails #= 0,
+  %Z #!= X+Y #=> Fails #= 1,
+  Fails :: 0..1, % moving this before the above 2 lines breaks the solve?
+  % Fails #= 0, % this also breaks the solve
+  Err #= abs(X+Y-Z),
   % X = 01010101010101010101010101010101010101010101 (5864062014805)
   % Y = 10101010101010101010101010101010101010101010
-  %(X+Y #!= Z) #<=> Counterexample[I] #= 1,
-  %Fails #= sum(Counterexample),
-  Fails :: 0..1,
-  %Fails #= 0, % this just prevents it from finding counterexamples...
+  (X+Y #!= Z) #<=> Counterexample[1] #= 1,
+  Fails #= sum(Counterexample),
+  Fails #= 0, % this just prevents it from finding counterexamples...
   garbage_collect(1000000000),
+  %show_all_regs(Gs,Regs),
   println(solving),
-  solve([$min(Fails)],[X,Y,Z,Fails,Counterexample,Index,Swapped,Regs]),
-  println([X,Y,Z]),
+  solve([maxsat,$min(Err),$max(Fails)],[X,Y,Z,Fails,Counterexample,Index,Swapped,Regs,Outputs]),
+  %show_all_regs(Gs,Regs),
+  println([X,Y,Z,abs(X+Y-Z)]),
   println(failed=Fails),
-  show_regs(x,Gs,Regs),
-  show_regs(y,Gs,Regs),
-  show_regs(z,Gs,Regs),
-
-  %solve([maxsat,$max(Fails)],[Xs,Ys,Zs,X,Y,Z,Fails,Counterexample,Index,Swapped]),
-  %println(swapped=Swapped),
   Reverse_gs = new_map(),
   foreach (K=V in Gs)
     Reverse_gs.put(V,K)
   end,
-  %println(index=Index),
   Swaps = [],
   foreach (I in 1..Gate_count)
     if Index[I] > I then
@@ -124,6 +134,11 @@ go({Inits,Gate_list}) =>
     end,
   end,
   println(swaps=Swaps.sort).
+
+show_all_regs(Gs,Regs) =>
+  foreach (K in Gs.keys.sort)
+    printf("%w = %w\n", K, Regs[Gs.get(K)])
+  end.
 
 show_regs(C,Gs,Regs) =>
   printf("%w: ", C),
@@ -141,7 +156,7 @@ assign_number(Ds,C,Regs,Gs,V) =>
   foreach (I in 1..Ds.len)
     K = to_fstring("%w%02d",C,I-1),
     Reg = Gs.get(K),
-    println(reg=[I,Ds.len-I+1,Reg,K]),
+    %println(reg=[I,Ds.len-I+1,Reg,K]),
     Ds[Ds.len-I+1] #= Regs[Reg],
   end,
   to_num_unsigned(Ds,V).
@@ -150,10 +165,10 @@ op(X,"AND",Y,Z) =>
   Z #= cond(X #= 1 #/\ Y #= 1, 1, 0).
 
 op(X,"OR",Y,Z) =>
-  Z #= cond(X #= 1 #\/ Y #= 1, 1, 0).  
+  Z #= cond(X #= 0 #/\ Y #= 0, 0, 1).  
 
 op(X,"XOR",Y,Z) =>
-  Z #= cond(X #= Y, 0, 1).    
+  Z #= cond(X #= Y, 0, 1).
 
 bin_to_dec(L) = [2**(L.len-I)*L[I] : I in 1..L.len].sum.
 to_num_unsigned(List, Num) =>
