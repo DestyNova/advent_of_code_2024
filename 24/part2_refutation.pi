@@ -1,6 +1,6 @@
 % Part 2 program mostly liberated from Hakan Kjellerstrand
 
-import cp.
+import sat.
 import regex.
 import util.
 
@@ -37,74 +37,78 @@ go({Inits,Gate_list}) =>
   all_different(Index),
   % swaps: Index[I] #!= I implies a register has been swapped with another gate
   Swapped = new_array(Gate_count),
-  foreach (I in 1..Gate_count)
-    [_,_,_,Reg_name] = Gate_list[I],
-    Reg #= Regs[Gs.get(Reg_name)],
-    element(I,Index,I2),
-    element(I2,Index,I),
-    I #!= I2 #<=> Swapped[I] #= 1,
-    I #= I2 #<=> Swapped[I] #= 0,
-    element(I2,Outputs,Reg), % pre-swap the outputs
-  end,
-  exactly(8,Swapped,1),
-  %println(out=[Outputs.len,Outputs.remove_dups.len]),
+  Swapped :: 0..1,
 
-  % now encode the instructions
+  % encode the instructions
   foreach(I in 1..Gate_count)
-    [X,Op,Y,_] = Gate_list[I],
+    [X,Op,Y,Reg_name] = Gate_list[I],
     Xv = Regs[Gs.get(X)],
     Yv = Regs[Gs.get(Y)],
-    % why does this help? we already did it...
-    %Swapped[I] #= 1 #=> Out_i #!= I,
-    %Swapped[I] #= 0 #=> Out_i #= I,
-    op(Xv,Op,Yv,Out),
-    element(I,Outputs,Out),
-    %if Res.first == 'z' then
-    %  Zs := Zs ++ [Res]
-    %end
+    Reg #= Regs[Gs.get(Reg_name)],
+
+    element(I,Index,I2), % I2 is the gate index whose register should be written to
+    element(I2,Index,I), % either this gate, or another gate that should write to this reg
+    % if membchk(Reg_name, ["kth","z12","gsd","z26","tbt","z32","vpm","qnf"]) then
+    %   % this makes it unsolvable... am I putting input in backwards or something? something is off.
+    %   I #!= I2
+    % end,
+    S :: 0..1,
+    element(I,Swapped,S),
+    element(I2,Swapped,S),
+    I #!= I2 #<=> S #= 1,
+    element(I2,Outputs,Reg), % swap destination register to another gate output
+    element(I,Outputs,Dest), % output of this gate
+    S #= 1 #=> Reg #= Dest,  % this doesn't help
+    op(Xv,Op,Yv,Dest),
   end,
+  exactly(8,Swapped,1),
+
   % count counterexample...
   Bits = 45, % yeah, hardcode for now
-  Xs = new_array(Bits), Ys = new_array(Bits), Zs = new_array(Bits + 1),
-  assign_number(Xs,"x",Regs,Gs,X),
-  assign_number(Ys,"y",Regs,Gs,Y),
-  assign_number(Zs,"z",Regs,Gs,Z),
-  println(c=[X,Y,Z]),
-  Counterexample = new_array(1),
+  Counterexample = new_array(50),
   Counterexample :: 0..1,
-  % I'm manually selecting values of X and Y here, but really what I want is
-  % for Picat to *try* to find values of the x?? and y?? inputs such that
-  % the z?? outputs don't equal X+Y. If we *can't* find such a counterexample,
-  % then the set of swaps in the Index array, when applied, restores the
-  % functioning of the adder network, and gives us our puzzle solution.
-  %X #= 2**44 - 1234, % why can't they both be 2**45-1?
-  %Y #= 2**45 - 1234,
+  foreach (I in 1..2)
+    Xs = new_array(Bits), Ys = new_array(Bits), Zs = new_array(Bits + 1),
+    assign_number(Xs,x,Regs,Gs,X),
+    assign_number(Ys,y,Regs,Gs,Y),
+    assign_number(Zs,z,Regs,Gs,Z),
+    X1 = random2() mod 2**1,
+    Y1 = random2() mod 2**1,
+    X #= 0,
+    Y #= 4095, % fails at 0 + 4096
+    Z #= X+Y,
+    % I'm manually selecting values of X and Y here, but really what I want is
+    % for Picat to *try* to find values of the x?? and y?? inputs such that
+    % the z?? outputs don't equal X+Y. If we *can't* find such a counterexample,
+    % then the set of swaps in the Index array, when applied, restores the
+    % functioning of the adder network, and gives us our puzzle solution.
+    %X #= 2**44 - 1234, % why can't they both be 2**45-1?
+    %Y #= 2**45 - 1234,
 
-  % X = 01010101010101010101010101010101010101010101 (5864062014805)
-  % Y = 10101010101010101010101010101010101010101010
-  % X #= 5864062014805, % why can't they both be 2**45-1?
-  % Y #= 11728124029610,
-  X #= 35508, % works for tiny numbers only... maybe the swaps aren't working?
-  Y #= 37119,
-  (X+Y #!= Z) #<=> Counterexample[1] #= 1,
+    % X = 01010101010101010101010101010101010101010101 (5864062014805)
+    % Y = 10101010101010101010101010101010101010101010
+    %(X+Y #!= Z) #<=> Counterexample[I] #= 1,
+    println([X,Y,Z]),
+  end,
   Fails #= sum(Counterexample),
-  Fails #= 0, % this just prevents it from finding counterexamples...
+  %Fails #= 0, % this just prevents it from finding counterexamples...
   garbage_collect(1000000000),
   println(solving),
   %solve([],[Z]),
-  solve([],[Xs,Ys,Zs,X,Y,Z,Fails,Counterexample,Index,Swapped]),
+  % Xs = new_array(46),
+  % assign_number(Xs,x,Regs,Gs,7),
+  % println(xs=Xs),
+  solve([],[Fails,Counterexample,Index,Swapped]),
   %solve([maxsat,$max(Fails)],[Xs,Ys,Zs,X,Y,Z,Fails,Counterexample,Index,Swapped]),
   println(swapped=Swapped),
-  println([X,Y,Z]),
   Reverse_gs = new_map(),
   foreach (K=V in Gs)
     Reverse_gs.put(V,K)
   end,
-  %println(rev=Reverse_gs),
   println(index=Index),
   Swaps = [],
   foreach (I in 1..Gate_count)
-    if Index[I] != I then
+    if Index[I] > I then
       println(swapped=[I,Index[I]]),
       println(Gate_list[I]),
       println(Gate_list[Index[I]]),
@@ -114,16 +118,12 @@ go({Inits,Gate_list}) =>
       Swaps := [Out2|Swaps],
     end,
   end,
-  println(swaps=Swaps.remove_dups.sort),
-  nl.
-  %println([Gs.get(Z) : Z in Zs.sort.reverse].bin_to_dec()).
+  println(swaps=Swaps.sort).
 
 assign_number(Ds,C,Regs,Gs,V) =>
-  println([C,Ds.len]),
   foreach (I in 1..Ds.len)
     Reg = Gs.get(to_fstring("%w%02d",C,I-1)),
-    Regs[Reg] #= K,
-    Ds[I] #= K
+    Ds[Ds.len-I+1] #= Regs[Reg],
   end,
   to_num_unsigned(Ds,V).
 
@@ -139,7 +139,7 @@ op(X,"XOR",Y,Z) =>
 bin_to_dec(L) = [2**(L.len-I)*L[I] : I in 1..L.len].sum.
 to_num_unsigned(List, Num) =>
    Len = List.len,
-   Num :: 0..2**47,
+   %Num :: 0..2**47,
    Num #= sum([List[I]*2**(Len-I) : I in 1..Len]).
 
 parse(S) = R =>
