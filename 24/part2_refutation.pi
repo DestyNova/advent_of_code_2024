@@ -17,25 +17,26 @@ go({Inits,Gate_list}) =>
     foreach (Reg in [G1,G2,Res])
       if not Gs.has_key(Reg) then
         X :: 0..1,
+        % maybe something is wrong here?
         Regs := [X|Regs],
         Gs.put(Reg,Regs.len),
       end,
     end,
   end,
   %println(gs=Gs),
-  Regs := Regs.reverse, % I forgot about this... we put elements in Regs backwards...
+  Regs := Regs.reverse, % we put elements in Regs backwards; reverse it to fix Gs
 
   N = Gs.size,
   Gate_count = Gate_list.len,
 
-  % Outputs maps from gate index to output register
+  % Outputs maps from gate index to the "true" output register
   Outputs = new_array(Gate_count),
   Outputs :: 0..1,
-  % indirection table for output registers
+  % indirection table for gates: most gate indices point to the same index in the outputs
+  % Index[I] #!= I implies gate I's output has been swapped with another gate's output
   Index = new_array(Gate_count),
   Index :: 1..Gate_count,
   all_different(Index),
-  % swaps: Index[I] #!= I implies a register has been swapped with another gate
   Swapped = new_array(Gate_count),
   Swapped :: 0..1,
 
@@ -48,16 +49,18 @@ go({Inits,Gate_list}) =>
 
     element(I,Index,I2), % I2 is the gate index whose register should be written to
     element(I2,Index,I), % either this gate, or another gate that should write to this reg
-    % if membchk(Reg_name, ["kth","z12","gsd","z26","tbt","z32","vpm","qnf"]) then
-    %   % this makes it unsolvable... am I putting input in backwards or something? something is off.
-    %   I #!= I2
-    % end,
+    if false && membchk(Reg_name, ["kth","z12","gsd","z26","tbt","z32","vpm","qnf"]) then
+      % this makes it unsolvable... am I putting input in backwards or something? something is off.
+      I #!= I2
+    end,
     S :: 0..1,
+    I #!= I2 #=> S #= 1,
+    I #= I2 #=> S #= 0,
     element(I,Swapped,S),
     element(I2,Swapped,S),
-    I #!= I2 #<=> S #= 1,
+
     element(I2,Outputs,Reg), % swap destination register to another gate output
-    element(I,Outputs,Dest), % output of this gate
+    element(I,Outputs,Dest), % true output of this gate (may be a different register)
     S #= 1 #=> Reg #= Dest,  % this doesn't help
     op(Xv,Op,Yv,Dest),
   end,
@@ -65,40 +68,38 @@ go({Inits,Gate_list}) =>
 
   % count counterexample...
   Bits = 45, % yeah, hardcode for now
-  Counterexample = new_array(50),
+  Counterexample = new_array(1),
   Counterexample :: 0..1,
-  foreach (I in 1..2)
-    Xs = new_array(Bits), Ys = new_array(Bits), Zs = new_array(Bits + 1),
-    assign_number(Xs,x,Regs,Gs,X),
-    assign_number(Ys,y,Regs,Gs,Y),
-    assign_number(Zs,z,Regs,Gs,Z),
-    X1 = random2() mod 2**1,
-    Y1 = random2() mod 2**1,
-    X #= 0,
-    Y #= 4095, % fails at 0 + 4096
-    Z #= X+Y,
-    % I'm manually selecting values of X and Y here, but really what I want is
-    % for Picat to *try* to find values of the x?? and y?? inputs such that
-    % the z?? outputs don't equal X+Y. If we *can't* find such a counterexample,
-    % then the set of swaps in the Index array, when applied, restores the
-    % functioning of the adder network, and gives us our puzzle solution.
-    %X #= 2**44 - 1234, % why can't they both be 2**45-1?
-    %Y #= 2**45 - 1234,
+  Xs = new_array(Bits), Ys = new_array(Bits), Zs = new_array(Bits + 1),
+  assign_number(Xs,x,Regs,Gs,X),
+  assign_number(Ys,y,Regs,Gs,Y),
+  assign_number(Zs,z,Regs,Gs,Z),
+  X1 = random2() mod 2**1,
+  Y1 = random2() mod 2**1,
+  X #= 1,
+  Y #= 4095, % fails at 0 + 4096
+  Z #= X+Y,
+  % I'm manually selecting values of X and Y here, but really what I want is
+  % for Picat to *try* to find values of the x?? and y?? inputs such that
+  % the z?? outputs don't equal X+Y. If we *can't* find such a counterexample,
+  % then the set of swaps in the Index array, when applied, restores the
+  % functioning of the adder network, and gives us our puzzle solution.
+  %X #= 2**44 - 1234, % why can't they both be 2**45-1?
+  %Y #= 2**45 - 1234,
 
-    % X = 01010101010101010101010101010101010101010101 (5864062014805)
-    % Y = 10101010101010101010101010101010101010101010
-    %(X+Y #!= Z) #<=> Counterexample[I] #= 1,
-    println([X,Y,Z]),
-  end,
+  % X = 01010101010101010101010101010101010101010101 (5864062014805)
+  % Y = 10101010101010101010101010101010101010101010
+  %(X+Y #!= Z) #<=> Counterexample[I] #= 1,
+  println([X,Y,Z]),
   Fails #= sum(Counterexample),
   %Fails #= 0, % this just prevents it from finding counterexamples...
   garbage_collect(1000000000),
   println(solving),
-  %solve([],[Z]),
-  % Xs = new_array(46),
-  % assign_number(Xs,x,Regs,Gs,7),
-  % println(xs=Xs),
-  solve([],[Fails,Counterexample,Index,Swapped]),
+  solve([],[Fails,Counterexample,Index,Swapped,Regs]),
+  printf("x: %w %w %w %w\n", Regs[Gs.get("x03")], Regs[Gs.get("x02")], Regs[Gs.get("x01")], Regs[Gs.get("x00")]),
+  printf("y: %w %w %w %w\n", Regs[Gs.get("y03")], Regs[Gs.get("y02")], Regs[Gs.get("y01")], Regs[Gs.get("y00")]),
+  printf("z: %w %w %w %w\n", Regs[Gs.get("z03")], Regs[Gs.get("z02")], Regs[Gs.get("z01")], Regs[Gs.get("z00")]),
+
   %solve([maxsat,$max(Fails)],[Xs,Ys,Zs,X,Y,Z,Fails,Counterexample,Index,Swapped]),
   println(swapped=Swapped),
   Reverse_gs = new_map(),
@@ -123,6 +124,7 @@ go({Inits,Gate_list}) =>
 assign_number(Ds,C,Regs,Gs,V) =>
   foreach (I in 1..Ds.len)
     Reg = Gs.get(to_fstring("%w%02d",C,I-1)),
+    println(reg=[I,Ds.len-I+1,Reg]),
     Ds[Ds.len-I+1] #= Regs[Reg],
   end,
   to_num_unsigned(Ds,V).
@@ -138,9 +140,8 @@ op(X,"XOR",Y,Z) =>
 
 bin_to_dec(L) = [2**(L.len-I)*L[I] : I in 1..L.len].sum.
 to_num_unsigned(List, Num) =>
-   Len = List.len,
-   %Num :: 0..2**47,
-   Num #= sum([List[I]*2**(Len-I) : I in 1..Len]).
+  Len = List.len,
+  Num #= sum([List[I]*2**(Len-I) : I in 1..Len]).
 
 parse(S) = R =>
   Init = regex_find_all("(.+): (\\d)", S),
