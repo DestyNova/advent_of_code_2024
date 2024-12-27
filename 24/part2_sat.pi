@@ -9,10 +9,8 @@
 % Haskell, as I understand it, prove statements by testing that the negation of
 % the statement is unsatisfiable -- i.e. there is no possible counterexample.
 % I couldn't figure out how to express this in Picat while *also* searching for the
-% swapped outputs. Instead, the program currently finds individual values of X/Y/Z
-% with some swaps that allow the equality X+Y #= Z to hold for those values,
-% which says nothing about the generality of the addition.
-
+% swapped outputs. Instead, we just iterate over a few random X/Y pairs and check
+% that they sum correctly after applying the swaps.
 import sat.
 import regex.
 import util.
