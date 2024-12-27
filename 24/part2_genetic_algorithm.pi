@@ -1,0 +1,214 @@
+import regex.
+import util.
+
+main =>
+  {Init,Gate_list} = read_file_chars().go,
+  Wires = new_map(),
+  foreach ([Wire,X] in Init)
+    Wires.put(Wire,X.to_int)
+  end,
+
+  Gates = new_map(),
+  foreach ([X,Op,Y,Dest] in Gate_list)
+    Gates.put([X,Op,Y],Dest)
+  end,
+  Gate_count = Gates.size,
+
+  % GA population
+  Population = [Sol : _ in 1..120, generate_solution(Gates,Sol)],
+  Score = maxint_small(),
+  Swaps = none,
+  N = 4,
+  T = 1,
+
+  Bits = 45,
+  Iters = 2,
+  X_test = new_array(Iters*Bits),
+  Y_test = new_array(Iters*Bits),
+  foreach (I in 1..Bits)
+    foreach (J in 1..Iters)
+      X_test[(I-1)*Iters+J] = (frand()*2**I).to_int,
+      Y_test[(I-1)*Iters+J] = (frand()*2**I).to_int,
+    end
+  end,
+  println(x_test=X_test),
+  println(y_test=Y_test),
+  println(max=max(X_test)),
+  println(max=max(Y_test)),
+
+  while (Score > 0)
+    % steady-state tournament GA
+    get_tournament_indices(Population,N,Ts),
+    Tournament = [Population[I] : I in Ts],
+    Scores = new_list(N),
+    foreach (I in 1..Tournament.len)
+      Sol = Tournament[I],
+      Gates2 = apply_swaps(Sol,Gates),
+      evaluate(Wires,Gates2,X_test,Y_test,Err),
+      Scores[I] := Err + frand()*0.5,
+      if Err < Score then
+        Swaps := get_solution(Sol,Gates),
+        printf("Tournament %w, errors: %w with swaps %w\n",T,Err,Swaps),
+        Score := Err
+      end,
+    end,
+    Winners = [P : {_,P} in zip(Scores,Tournament).sort.take(N//2)],
+    if Winners.len != 2 then
+      println("died zipping winners"),
+      exit
+    end,
+    %_ = [_:S in Winners,println(winner=get_solution(S,Gates))],
+    Pairs = [{A,B} : A in Winners, B in Winners].take(N//2), % incl. reverse
+    if Pairs.len != 2 then
+      printf("died making pairs: %w -> %w\n",Winners,Pairs),
+      exit
+    end,
+    Children = [C2 : {A,B} in Pairs, crossover(A,B,C1), mutate(C1,Gates,C2)],
+    if Children.len != 2 then
+      println("died making kids"),
+      exit
+    end,
+    %_ = [_:S in Children,println(child=get_solution(S,Gates))],
+    %foreach ({I,P} in zip(Ts,Children ++ Winners))
+    foreach ({I,P} in zip(Ts,Children))
+      Population[I] := P
+    end,
+    if T mod 10 == 0 then
+      % foreach (P in Population)
+      %   get_solution(P,Gates).println,
+      % end,
+      printf("\n## Tournament %w, pop: %w, score: %w, swaps: %w ##\n", T, Population.len, Score, Swaps),
+      garbage_collect(1000000000),
+    end,
+    T := T + 1
+  end,
+  println(out=[Score,Out,Bits]).
+
+get_solution(Sol,Gates) = [{Gates.get(A),Gates.get(B)} : {A,B} in Sol].flatten.
+
+get_tournament_indices(Population,N,R) =>
+  Ts = new_list(N),
+  foreach (I in 1..N)
+    Ts[I] = random(1,Population.len)
+  end,
+  if Ts.remove_dups.len != N then
+    get_tournament_indices(Population,N,R)
+  else
+    R = Ts,
+  end.
+
+generate_solution(Gates,R) =>
+  Gate_count = Gates.size,
+  Keys = Gates.keys,
+  Swaps = new_list(4),
+  while (invalid_solution(Swaps))
+    foreach (I in 1..4)
+      A = random(1,Gate_count-1),
+      B = random(A+1,Gate_count),
+      Swaps[I] := {Keys[A],Keys[B]},
+    end,
+  end,
+  R = Swaps.
+
+% apply crossover 70% of the time (if valid), keep first parent otherwise
+crossover(A,B,C) =>
+  if frand() < 0.4 then
+    C0 = [A[1],A[2],B[3],B[4]],
+    C = cond(invalid_solution(C0), A, C0),
+  else
+    C = A.copy_term,
+  end.
+
+invalid_solution(S) =>
+  Keys = new_set(),
+  foreach ({A,B} in S)
+    Keys.put(A),
+    Keys.put(B),
+  end,
+  Keys.size != 8.
+
+mutate(Swaps,Gates,R) =>
+  X = frand(),
+  if X > 0.98 then % elitism, don't mutate
+    R = Swaps.copy_term,
+  elseif X > 0.93 then
+    R = Swaps.drop(1) ++ Swaps.take(1),
+  elseif X > 0.85 then
+    generate_solution(Gates,R)
+  else
+    Gate_count = Gates.size,
+    Keys = Gates.keys,
+    Swaps2 = Swaps.copy_term,
+
+    while (Swaps2 == Swaps || invalid_solution(Swaps2))
+      I = random(1,Swaps.len),
+      {A,B} = Swaps[I],
+      D = Keys[random(1,Gate_count)],
+      Swaps2[I] := cond(frand()<0.5,{A,D},{D,B}),
+    end,
+    R = Swaps2,
+  end.
+
+apply_swaps(Sol,Gates) = R =>
+  Gates2 = Gates.copy_term,
+  foreach ({G1,G2} in Sol)
+    D1 = Gates2.get(G1),
+    D2 = Gates2.get(G2),
+    Gates2.put(G1,D2),
+    Gates2.put(G2,D1),
+  end,
+  R = Gates2.
+
+evaluate(Wires,Gates,X_test,Y_test,Err) =>
+  Bits = 44,
+  Keys = Gates.keys,
+  Bad = 0,
+
+  foreach (I in 1..X_test.len)
+    X = X_test[I],
+    Y = Y_test[I],
+    Xv = X.to_binvector,
+    Yv = Y.to_binvector,
+    W = new_set(),
+    foreach (D in 1..Xv.len)
+      W.put(to_fstring("x%02d",D-1),Xv[D]),
+      W.put(to_fstring("y%02d",D-1),Yv[D]),
+    end,
+    Z = run(W,Gates.copy_term),
+    if X + Y != Z then
+      Bad := Bad + 1
+    end
+  end,
+  Err = Bad.
+
+run(Wires,Gates) = R =>
+  Count = Gates.size + 2, % fudge to avoid infinite loops
+  while (Gates.size > 0 && Count > 0)
+    %println(Gates.size),
+    foreach (Gate=Dest in Gates)
+      [A,Op,B] = Gate,
+      Ticks = 0,
+      if Wires.has_key(A) && Wires.has_key(B) then
+        Wires.put(Dest,op(Op,A,B,Wires)),
+        Ticks := Ticks + 1,
+        Gates.del(Gate),
+      end,
+    end,
+    Count := Count - max(1,Ticks)
+  end,
+  Outs = [{K.tail.to_int,V} : K=V in Wires, K[1]='z'].sort.reverse.map(last),
+  %println(Outs),
+  R = fold(from_bin,0,Outs).
+
+% to_binvector returns X as a list of binary digits in reverse order (since we read it back that way)
+to_binvector(X) = ([0:_ in 1..45] ++ [D.ord-48: D in to_binary_string(X)]).reverse.take(45).
+from_bin(X,Acc) = Acc*2 + X.
+
+op("AND",A,B,W) = W.get(A) * W.get(B).
+op("OR",A,B,W) = max(W.get(A),W.get(B)).
+op("XOR",A,B,W) = (W.get(A) - W.get(B))**2.
+
+go(S) = R =>
+  Init = regex_find_all("(.+): (\\d)", S),
+  Gates = regex_find_all("(.+) (AND|OR|XOR) (.+) -\\> (\\w+)", S),
+  R = {Init,Gates}.

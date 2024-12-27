@@ -20,102 +20,92 @@ import util.
 main => read_file_chars().parse.go.
 
 go({Inits,Gate_list}) => 
-  Gs = new_map(),
-  Regs = [],
-
-  % build a list of variables for all registers + map of register name to its index
-  %println(gates=Gate_list),
-  foreach([G1,_,G2,Res] in Gate_list)
-    %println(group=[G1,G2,Res]),
-    foreach (Reg in [G1,G2,Res])
-      if not Gs.has_key(Reg) then
-        X :: 0..1,
-        % maybe something is wrong here?
-        Regs := [X|Regs],
-        Gs.put(Reg,Regs.len),
-      end,
-    end,
-  end,
-  %println(gs=Gs),
-  Regs := Regs.reverse, % we put elements in Regs backwards; reverse it to fix Gs
-
-  N = Gs.size,
   Gate_count = Gate_list.len,
+  All_gates = fold((++),[],[[G1,G2,Res] : [G1,_,G2,Res] in Gate_list]).remove_dups.sort,
+  N = All_gates.len,
+  println(all_gates=[All_gates,N]),
+  Gs = new_map(),
+  foreach ({I,G} in zip(1..N, All_gates))
+    Gs.put(G,I)
+  end,
+  Iters = 8,
+  Regs = new_array(Iters,N),
+  Regs :: 0..1,
 
-  % Outputs maps from gate index to the "true" output register
-  Outputs = new_array(Gate_count),
-  Outputs :: 0..1,
   % indirection table for gates: most gate indices point to the same index in the outputs
   % Index[I] #!= I implies gate I's output has been swapped with another gate's output
+  Swapped = new_array(Gate_count),
+  Swapped :: 0..1,
   Index = new_array(Gate_count),
   Index :: 1..Gate_count,
   all_different(Index),
-  Swapped = new_array(Gate_count),
-  Swapped :: 0..1,
 
-  % encode the instructions
-  foreach(I in 1..Gate_count)
-    [X,Op,Y,Reg_name] = Gate_list[I],
-    Xv = Regs[Gs.get(X)],
-    Yv = Regs[Gs.get(Y)],
-    K = Gs.get(Reg_name),
-    element(K,Regs,Reg),
-    %Reg = Regs[K],
-
-    element(I,Index,I2), % I2 is the gate index whose register should be written to
-    element(I2,Index,I), % either this gate, or another gate that should write to this reg
-    if false && membchk(Reg_name, ["kth","z12","gsd","z26","tbt","z32","vpm","qnf"]) then
-      % this makes it unsolvable... am I putting input in backwards or something? something is off.
-      println(force_swapping=Gate_list[I]),
-      I #!= I2
-    end,
-    S :: 0..1,
-    I #!= I2 #=> S #= 1,
-    I #= I2 #=> S #= 0,
-    element(I,Swapped,S),
-    element(I2,Swapped,S),
-
-    % why does this fail?
-    element(I2,Outputs,Reg), % swap destination register to another gate output
-    element(I,Outputs,Dest), % true output of this gate (may be a different register)
-    S #= 0 #=> Reg #= Dest,  % this doesn't help
-    op(Xv,Op,Yv,Dest),
-  end,
-  exactly(8,Swapped,1),
-
-  % count counterexample...
-  Bits = 45, % yeah, hardcode for now
-  Counterexample = new_array(1),
+  Counterexample = new_array(Iters),
   Counterexample :: 0..1,
-  Xs = new_array(Bits), Ys = new_array(Bits), Zs = new_array(Bits + 1),
-  assign_number(Xs,x,Regs,Gs,X),
-  assign_number(Ys,y,Regs,Gs,Y),
-  assign_number(Zs,z,Regs,Gs,Z),
-  X #> 0, Y #> 0,
-  %X1 = random2() mod 2**45,
-  %Y1 = random2() mod 2**45,
-  % X #= X1, Y #= Y1,
-  %X #= 2**45-1, Y #= 2**45-1,
-  %X #= 35184372088831,
-  %Y #= 33939827265535, % fails at 1 + 4095
-  %println([X,Y,X+Y]),
-  %Z #= X+Y,
-  %Z #= X+Y #=> Fails #= 0,
-  %Z #!= X+Y #=> Fails #= 1,
+
+  foreach (Iter in 1..Iters)
+    % Outputs maps from gate index to the "true" output register
+    Outputs = new_array(Gate_count),
+    Outputs :: 0..1,
+
+    % encode the instructions
+    foreach(I in 1..Gate_count)
+      [X,Op,Y,Reg_name] = Gate_list[I],
+      Xv = Regs[Iter,Gs.get(X)],
+      Yv = Regs[Iter,Gs.get(Y)],
+      K = Gs.get(Reg_name),
+      element(K,Regs[Iter],Reg),
+      element(I,Index,I2), % I2 is the gate index whose register should be written to
+      element(I2,Index,I), % either this gate, or another gate that should write to this reg
+      if false && membchk(Reg_name, ["kth","z12","gsd","z26","tbt","z32","vpm","qnf"]) then
+        println(force_swapping=Gate_list[I]),
+        I #!= I2
+      end,
+      S :: 0..1,
+      I #!= I2 #=> S #= 1,
+      I #= I2 #=> S #= 0,
+      element(I,Swapped,S),
+      element(I2,Swapped,S),
+
+      element(I2,Outputs,Reg), % swap destination register to another gate output
+      element(I,Outputs,Dest), % true output of this gate (may be a different register)
+      S #= 0 #=> Reg #= Dest,  % this doesn't help
+      op(Xv,Op,Yv,Dest),
+    end,
+    exactly(8,Swapped,1),
+
+    % count counterexample...
+    Bits = 45, % yeah, hardcode for now
+    Xs = new_array(Bits), Ys = new_array(Bits), Zs = new_array(Bits + 1),
+    assign_number(Xs,x,Regs[Iter],Gs,X),
+    assign_number(Ys,y,Regs[Iter],Gs,Y),
+    assign_number(Zs,z,Regs[Iter],Gs,Z),
+    X #> 0, Y #> 0,
+    X1 = (frand()*2**Bits).to_int,
+    Y1 = (frand()*2**Bits).to_int,
+    X #= X1, Y #= Y1,
+    %X #= 2**45-1, Y #= 2**45-1,
+    % X #= 35184372088831,
+    % Y #= 33939827265535,
+    %Z #= X+Y,
+    %Z #= X+Y #=> Fails #= 0,
+    %Z #!= X+Y #=> Fails #= 1,
+    % Fails #= 0, % this also breaks the solve
+    Err #= abs(X+Y-Z),
+    % X = 01010101010101010101010101010101010101010101 (5864062014805)
+    % Y = 10101010101010101010101010101010101010101010
+    (X+Y #!= Z) #<=> Counterexample[1] #= 1,
+  end,
   Fails :: 0..1, % moving this before the above 2 lines breaks the solve?
-  % Fails #= 0, % this also breaks the solve
-  Err #= abs(X+Y-Z),
-  % X = 01010101010101010101010101010101010101010101 (5864062014805)
-  % Y = 10101010101010101010101010101010101010101010
-  (X+Y #!= Z) #<=> Counterexample[1] #= 1,
   Fails #= sum(Counterexample),
   Fails #= 0, % this just prevents it from finding counterexamples...
   garbage_collect(1000000000),
   %show_all_regs(Gs,Regs),
   println(solving),
-  solve([maxsat,$min(Err),$max(Fails)],[X,Y,Z,Fails,Counterexample,Index,Swapped,Regs,Outputs]),
+  %solve([maxsat,$min(Err),$max(Fails)],[X,Y,Z,Fails,Counterexample,Index,Swapped,Regs,Outputs]),
+  solve([],[Regs,Index]),
   %show_all_regs(Gs,Regs),
-  println([X,Y,Z,abs(X+Y-Z)]),
+  %println([X,Y,Z,abs(X+Y-Z)]),
   println(failed=Fails),
   Reverse_gs = new_map(),
   foreach (K=V in Gs)

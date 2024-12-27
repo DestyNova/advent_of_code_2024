@@ -26,7 +26,7 @@ x00 XOR y00 -> z00
 x00 AND y00 -> bdj
 ```
 
-Well! It seems clear that the first operation is equivalent to adding the first two binary digits and throwing away the carry. This pattern repeats throughout the file, but it's only directly assigned to an output register for `z00`. The second instruction sets `bdj` to 1 if both `x00` and `y00` were 1, so this where we carry forward.
+Well! It seems clear that the first operation is equivalent to adding the first two binary digits and throwing away the carry. This pattern repeats throughout the file, but it's only directly assigned to an output register for `z00`. The second instruction sets `bdj` to 1 if both `x00` and `y00` were 1, so this is where we carry forward.
 
 I moved through the file, reordering instructions that referenced the next digits `x01` and `y01`, discovering more:
 

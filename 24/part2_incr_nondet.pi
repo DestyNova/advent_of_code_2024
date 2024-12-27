@@ -1,0 +1,103 @@
+import regex.
+import util.
+
+main =>
+  {Init,Gate_list} = read_file_chars().go,
+  Wires = new_map(),
+  foreach ([Wire,X] in Init)
+    Wires.put(Wire,X.to_int)
+  end,
+
+  Gates = new_map(),
+  foreach ([X,Op,Y,Dest] in Gate_list)
+    Gates.put([X,Op,Y],Dest)
+  end,
+  %println(gates=Gates),
+
+  Swapped = new_set(),
+  minof(find_swapped_wires(Wires,Gates,Swapped,Err,Out), Err, $printf("best err: %w, swapped: %w\n",Err,Swapped)),
+  println(out=[Err,Out,Swapped]).
+
+find_swapped_wires(Wires,Gates,Swapped,Err,Out) ?=>
+  println(search),
+
+  Bits = 45,
+  Iters = 2,
+  X_rnd = new_array(Bits,Iters),
+  Y_rnd = new_array(Bits,Iters),
+  Xv_rnd = new_array(Bits,Iters),
+  Yv_rnd = new_array(Bits,Iters),
+  foreach (I in 1..Bits)
+    foreach(J in 1..Iters)
+      X_rnd[I,J] = (frand()*2**I).to_int,
+      Y_rnd[I,J] = (frand()*2**I).to_int,
+      Xv_rnd[I,J] = to_binvector(X_rnd[I,J]),
+      Yv_rnd[I,J] = to_binvector(Y_rnd[I,J])
+    end
+  end,
+
+  Keys = Gates.keys,
+  % either change nothing or swap two gate destinations
+  (true ; (
+    between(1,Gates.size-1,G1),
+    between(G1+1,Gates.size,G2),
+    nth(G1,Keys,Gate), D1 = Gates.get(Gate), not Swapped.has_key(D1), Swapped.put(D1),
+    nth(G2,Keys,Gate2), D2 = Gates.get(Gate2), not Swapped.has_key(D2), Swapped.put(D2),
+    Gates.put(Gate,D2),
+    Gates.put(Gate2,D1)
+  )),
+
+  Errs = 0,
+  foreach (I in 1..Bits)
+    foreach (J in 1..Iters)
+      X = X_rnd[I,J],
+      Y = Y_rnd[I,J],
+      Xv = Xv_rnd[I,J],
+      Yv = Yv_rnd[I,J],
+      W = new_set(),
+      foreach (D in 1..Xv.len)
+        W.put(to_fstring("x%02d",D-1),Xv[D]),
+        W.put(to_fstring("y%02d",D-1),Yv[D]),
+      end,
+      Z = run(W,Gates.copy_term),
+      if X + Y != Z then
+        Errs := Errs + 1
+      end
+    end,
+    %printf("bit %w ok, current swaps: %w\n",I,Swapped),
+  end,
+  %println(done=Swapped),
+  Err = Errs,
+  Out = Swapped.
+
+run(Wires,Gates) = R =>
+  Count = Gates.size + 2, % fudge to avoid infinite loops
+  while (Gates.size > 0 && Count > 0)
+    %println(Gates.size),
+    foreach (Gate=Dest in Gates)
+      [A,Op,B] = Gate,
+      Ticks = 0,
+      if Wires.has_key(A) && Wires.has_key(B) then
+        Wires.put(Dest,op(Op,A,B,Wires)),
+        Ticks := Ticks + 1,
+        Gates.del(Gate),
+      end,
+    end,
+    Count := Count - max(1,Ticks)
+  end,
+  Outs = [{K.tail.to_int,V} : K=V in Wires, K[1]='z'].sort.reverse.map(last),
+  %println(Outs),
+  R = fold(from_bin,0,Outs).
+
+% to_binvector returns X as a list of binary digits in reverse order (since we read it back that way)
+to_binvector(X) = ([0:_ in 1..45] ++ [D.ord-48: D in to_binary_string(X)]).reverse.take(45).
+from_bin(X,Acc) = Acc*2 + X.
+
+op("AND",A,B,W) = W.get(A) * W.get(B).
+op("OR",A,B,W) = max(W.get(A),W.get(B)).
+op("XOR",A,B,W) = (W.get(A) - W.get(B))**2.
+
+go(S) = R =>
+  Init = regex_find_all("(.+): (\\d)", S),
+  Gates = regex_find_all("(.+) (AND|OR|XOR) (.+) -\\> (\\w+)", S),
+  R = {Init,Gates}.
