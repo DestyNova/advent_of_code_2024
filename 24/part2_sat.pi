@@ -40,7 +40,9 @@ go({Inits,Gate_list}) =>
 
   Counterexample = new_array(Iters),
   Counterexample :: 0..1,
+  _ = random(1),
 
+  Bits = 45,
   foreach (Iter in 1..Iters)
     % Outputs maps from gate index to the "true" output register
     Outputs = new_array(Gate_count),
@@ -55,13 +57,10 @@ go({Inits,Gate_list}) =>
       element(K,Regs[Iter],Reg),
       element(I,Index,I2), % I2 is the gate index whose register should be written to
       element(I2,Index,I), % either this gate, or another gate that should write to this reg
-      if false && membchk(Reg_name, ["kth","z12","gsd","z26","tbt","z32","vpm","qnf"]) then
-        println(force_swapping=Gate_list[I]),
-        I #!= I2
-      end,
       S :: 0..1,
       I #!= I2 #=> S #= 1,
       I #= I2 #=> S #= 0,
+      %S #= cond(I #= I2, 0, 1),
       element(I,Swapped,S),
       element(I2,Swapped,S),
 
@@ -72,7 +71,6 @@ go({Inits,Gate_list}) =>
     end,
     exactly(8,Swapped,1),
 
-    Bits = 45,
     Xs = new_array(Bits), Ys = new_array(Bits), Zs = new_array(Bits + 1),
     assign_number(Xs,x,Regs[Iter],Gs,X),
     assign_number(Ys,y,Regs[Iter],Gs,Y),
@@ -87,7 +85,6 @@ go({Inits,Gate_list}) =>
   Fails :: 0..1, % moving this before the above 2 lines breaks the solve?
   Fails #= sum(Counterexample),
   Fails #= 0,
-  garbage_collect(1000000000),
   %show_all_regs(Gs,Regs),
   println(solving),
   %solve([maxsat,$min(Err),$max(Fails)],[X,Y,Z,Fails,Counterexample,Index,Swapped,Regs,Outputs]),
@@ -136,7 +133,7 @@ assign_number(Ds,C,Regs,Gs,V) =>
   end,
   to_num_unsigned(Ds,V).
 
-op(X,"AND",Y,Z) => (X #= 1 #/\ Y #= 1) #<=> Z.
+op(X,"AND",Y,Z) => (X #= 1 #/\ Y #= 1) #=> Z #= 1, (X #= 0 #\/ Y #= 0) #=> Z #= 0.
 op(X,"OR",Y,Z) => (X #= 1 #\/ Y #= 1) #<=> Z.
 op(X,"XOR",Y,Z) => (X #!= Y) #<=> Z.
 
