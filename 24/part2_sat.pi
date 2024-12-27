@@ -74,8 +74,7 @@ go({Inits,Gate_list}) =>
     end,
     exactly(8,Swapped,1),
 
-    % count counterexample...
-    Bits = 45, % yeah, hardcode for now
+    Bits = 45,
     Xs = new_array(Bits), Ys = new_array(Bits), Zs = new_array(Bits + 1),
     assign_number(Xs,x,Regs[Iter],Gs,X),
     assign_number(Ys,y,Regs[Iter],Gs,Y),
@@ -84,28 +83,17 @@ go({Inits,Gate_list}) =>
     X1 = (frand()*2**Bits).to_int,
     Y1 = (frand()*2**Bits).to_int,
     X #= X1, Y #= Y1,
-    %X #= 2**45-1, Y #= 2**45-1,
-    % X #= 35184372088831,
-    % Y #= 33939827265535,
-    %Z #= X+Y,
-    %Z #= X+Y #=> Fails #= 0,
-    %Z #!= X+Y #=> Fails #= 1,
-    % Fails #= 0, % this also breaks the solve
     Err #= abs(X+Y-Z),
-    % X = 01010101010101010101010101010101010101010101 (5864062014805)
-    % Y = 10101010101010101010101010101010101010101010
     (X+Y #!= Z) #<=> Counterexample[1] #= 1,
   end,
   Fails :: 0..1, % moving this before the above 2 lines breaks the solve?
   Fails #= sum(Counterexample),
-  Fails #= 0, % this just prevents it from finding counterexamples...
+  Fails #= 0,
   garbage_collect(1000000000),
   %show_all_regs(Gs,Regs),
   println(solving),
   %solve([maxsat,$min(Err),$max(Fails)],[X,Y,Z,Fails,Counterexample,Index,Swapped,Regs,Outputs]),
   solve([],[Regs,Index]),
-  %show_all_regs(Gs,Regs),
-  %println([X,Y,Z,abs(X+Y-Z)]),
   println(failed=Fails),
   Reverse_gs = new_map(),
   foreach (K=V in Gs)
@@ -146,19 +134,13 @@ assign_number(Ds,C,Regs,Gs,V) =>
   foreach (I in 1..Ds.len)
     K = to_fstring("%w%02d",C,I-1),
     Reg = Gs.get(K),
-    %println(reg=[I,Ds.len-I+1,Reg,K]),
     Ds[Ds.len-I+1] #= Regs[Reg],
   end,
   to_num_unsigned(Ds,V).
 
-op(X,"AND",Y,Z) =>
-  Z #= cond(X #= 1 #/\ Y #= 1, 1, 0).
-
-op(X,"OR",Y,Z) =>
-  Z #= cond(X #= 0 #/\ Y #= 0, 0, 1).  
-
-op(X,"XOR",Y,Z) =>
-  Z #= cond(X #= Y, 0, 1).
+op(X,"AND",Y,Z) => (X #= 1 #/\ Y #= 1) #<=> Z.
+op(X,"OR",Y,Z) => (X #= 1 #\/ Y #= 1) #<=> Z.
+op(X,"XOR",Y,Z) => (X #!= Y) #<=> Z.
 
 bin_to_dec(L) = [2**(L.len-I)*L[I] : I in 1..L.len].sum.
 to_num_unsigned(List, Num) =>
