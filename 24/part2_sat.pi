@@ -80,9 +80,9 @@ go({Inits,Gate_list}) =>
     Y1 = (frand()*2**Bits).to_int,
     X #= X1, Y #= Y1,
     Err #= abs(X+Y-Z),
-    (X+Y #!= Z) #<=> Counterexample[1] #= 1,
+    (X+Y #!= Z) #<=> Counterexample[Iter] #= 1,
   end,
-  Fails :: 0..1, % moving this before the above 2 lines breaks the solve?
+  Fails :: 0..Iters, % moving this before the above 2 lines breaks the solve?
   Fails #= sum(Counterexample),
   Fails #= 0,
   %show_all_regs(Gs,Regs),
