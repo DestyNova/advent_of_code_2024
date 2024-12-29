@@ -56,6 +56,8 @@ The pairs of swapped instructions were localised within these blocks, presumably
 
 After maybe 90 minutes I'd figured out the pattern and manually located all pairs of swapped instructions, sorted them in the Picat REPL and submitted the correct answer on the first attempt. Phew!
 
+**Update 2024-12-27:** I got the Picat SAT program working for part 2, and with some optimisations it finds the correct answer in 21 seconds.
+
 ## Timings
 
 ### Part 1
@@ -70,3 +72,4 @@ Benchmark 1: picat_regex part1.pi < input
 
 * Brute-forcer with probabilistic "it can add" checker: Possibly billions of years
 * Reverse engineering the program in vim: About 90 minutes
+* SAT program with probabilistic test (8 random X/Y pairs): 20.6 seconds

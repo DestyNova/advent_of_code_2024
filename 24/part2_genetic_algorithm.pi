@@ -15,7 +15,7 @@ main =>
   Gate_count = Gates.size,
 
   % GA population
-  Population = [Sol : _ in 1..120, generate_solution(Gates,Sol)],
+  Population = [Sol : _ in 1..400, generate_solution(Gates,Sol)],
   Score = maxint_small(),
   Swaps = none,
   N = 4,
@@ -69,8 +69,8 @@ main =>
       exit
     end,
     %_ = [_:S in Children,println(child=get_solution(S,Gates))],
-    %foreach ({I,P} in zip(Ts,Children ++ Winners))
-    foreach ({I,P} in zip(Ts,Children))
+    foreach ({I,P} in zip(Ts,Children ++ Winners))
+    %foreach ({I,P} in zip(Ts,Children))
       Population[I] := P
     end,
     if T mod 10 == 0 then
@@ -82,7 +82,7 @@ main =>
     end,
     T := T + 1
   end,
-  println(out=[Score,Out,Bits]).
+  fold((++),[],[[A,B] : {A,B} in Swaps]).sort.join(",").println.
 
 get_solution(Sol,Gates) = [{Gates.get(A),Gates.get(B)} : {A,B} in Sol].flatten.
 
@@ -110,10 +110,12 @@ generate_solution(Gates,R) =>
   end,
   R = Swaps.
 
-% apply crossover 70% of the time (if valid), keep first parent otherwise
 crossover(A,B,C) =>
-  if frand() < 0.4 then
+  if frand() < 0.3 then
     C0 = [A[1],A[2],B[3],B[4]],
+    C = cond(invalid_solution(C0), A, C0),
+  elseif frand() < 0.6 then
+    C0 = [A[1],B[2],A[3],B[4]],
     C = cond(invalid_solution(C0), A, C0),
   else
     C = A.copy_term,
@@ -129,11 +131,11 @@ invalid_solution(S) =>
 
 mutate(Swaps,Gates,R) =>
   X = frand(),
-  if X > 0.98 then % elitism, don't mutate
+  if X > 0.95 then % elitism, don't mutate
     R = Swaps.copy_term,
-  elseif X > 0.93 then
-    R = Swaps.drop(1) ++ Swaps.take(1),
   elseif X > 0.85 then
+    R = Swaps.drop(1) ++ Swaps.take(1),
+  elseif X > 0.8 then
     generate_solution(Gates,R)
   else
     Gate_count = Gates.size,

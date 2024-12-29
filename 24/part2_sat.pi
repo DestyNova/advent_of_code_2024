@@ -57,39 +57,39 @@ go({Inits,Gate_list}) =>
       element(K,Regs[Iter],Reg),
       element(I,Index,I2), % I2 is the gate index whose register should be written to
       element(I2,Index,I), % either this gate, or another gate that should write to this reg
-      S :: 0..1,
-      I #!= I2 #=> S #= 1,
-      I #= I2 #=> S #= 0,
-      %S #= cond(I #= I2, 0, 1),
+      S :: 0..1, % 30% slower without this
+      I #!= I2 #=> S #= 1, % the order of these two implications
+      I #= I2 #=> S #= 0,  % affects performance, but why?
+      %S #= cond(I #= I2, 0, 1), % this about 30% slower than the two implications
       element(I,Swapped,S),
       element(I2,Swapped,S),
-
       element(I2,Outputs,Reg), % swap destination register to another gate output
       element(I,Outputs,Dest), % true output of this gate (may be a different register)
-      S #= 0 #=> Reg #= Dest,  % this doesn't help
+      S #= 0 #=> Reg #= Dest,  % 3x slower without this (or 2x if moved before element(I,Outputs,Dest))
       op(Xv,Op,Yv,Dest),
     end,
     exactly(8,Swapped,1),
 
     Xs = new_array(Bits), Ys = new_array(Bits), Zs = new_array(Bits + 1),
-    X #> 0, Y #> 0,
+    %[X,Y] :: 0..2**45, % 5x slower with this
+    X #> 0, Y #> 0, % 4x slower without this
     assign_number(Xs,x,Regs[Iter],Gs,X),
     assign_number(Ys,y,Regs[Iter],Gs,Y),
     assign_number(Zs,z,Regs[Iter],Gs,Z),
     X1 = (frand()*2**Bits).to_int,
     Y1 = (frand()*2**Bits).to_int,
     X #= X1, Y #= Y1,
+    %Err :: 0..2**46, % 2x slower with this
     Err #= abs(X+Y-Z),
     (X+Y #!= Z) #=> Counterexample[Iter] #= 1, % #=> is about 12% faster than #<=> here
   end,
-  % Fails :: 0..Iters, % moving this before the above 2 lines breaks the solve?
+  % Fails :: 0..Iters,
   % Fails #= 0,
   exactly(Iters,Counterexample,0),
   %show_all_regs(Gs,Regs),
   println(solving),
   %solve([maxsat,$min(Err),$max(Fails)],[X,Y,Z,Fails,Counterexample,Index,Swapped,Regs,Outputs]),
-  solve([],[Regs,Index]), % omitting Regs slows the solve down by 3x
-  %println(failed=Fails),
+  solve([],[Regs,Index]), % omitting Regs slows the solve down by 3x. [Regs ++ Index] is about 4x slower.
   Reverse_gs = new_map(),
   foreach (K=V in Gs)
     Reverse_gs.put(V,K)
@@ -133,9 +133,9 @@ assign_number(Ds,C,Regs,Gs,V) =>
   end,
   to_num_unsigned(Ds,V).
 
-op(X,"AND",Y,Z) => (X #= 1 #/\ Y #= 1) #=> Z #= 1, (X #= 0 #\/ Y #= 0) #=> Z #= 0.
-op(X,"OR",Y,Z) => (X #= 1 #\/ Y #= 1) #<=> Z.
-op(X,"XOR",Y,Z) => (X #!= Y) #<=> Z.
+op(X,"AND",Y,Z) => (X #= 1 #/\ Y #= 1) #=> Z #= 1, (X #= 0 #\/ Y #= 0) #=> Z #= 0. % much faster than #<=>
+op(X,"OR",Y,Z) => (X #= 1 #\/ Y #= 1) #<=> Z. % but not here
+op(X,"XOR",Y,Z) => (X #!= Y) #<=> Z.          % or here
 
 bin_to_dec(L) = [2**(L.len-I)*L[I] : I in 1..L.len].sum.
 to_num_unsigned(List, Num) =>
