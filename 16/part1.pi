@@ -1,4 +1,3 @@
-%import planner.
 import planner_star.
 
 main =>
@@ -9,16 +8,10 @@ main =>
   get_heap_map(grid).put(1,G),
 
   garbage_collect(800000000),
-  %best_plan_bin({Sx,Sy,Ex,Ey,e},Plan,C),
   best_plan_star({Sx,Sy,Ex,Ey,e},Plan,C),
-  println(Plan),
-  println(C).
+  printf("%w\n\nCost: %w\n", Plan, C).
 
-show(G) =>
-  foreach (L in G)
-    println(L)
-  end,
-  nl.
+show(G) => _ = [_ : L in G, L.println], nl.
 
 find_thing(G,C,S0) ?=>
   nth(Y,G,Row),
@@ -35,7 +28,6 @@ right(s) = w.
 right(w) = n.
 left(D) = D.right.right.right.
 
-%final({Sx,Sy,Ex,Ey,_}) => Sx = Ex, Sy = Ey, current_resource_plan_cost(_,_,C),C.println.
 final({Sx,Sy,Ex,Ey,_}) => Sx = Ex, Sy = Ey.
 
 table
