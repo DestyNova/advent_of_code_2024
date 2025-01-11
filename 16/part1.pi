@@ -2,12 +2,9 @@ import planner_star.
 
 main =>
   G = read_file_lines(),
-  %show(G),
   find_thing(G,'S',{Sx,Sy}),
   find_thing(G,'E',{Ex,Ey}),
   get_heap_map(grid).put(1,G),
-
-  garbage_collect(800000000),
   best_plan_star({Sx,Sy,Ex,Ey,e},Plan,C),
   printf("%w\n\nCost: %w\n", Plan, C).
 
